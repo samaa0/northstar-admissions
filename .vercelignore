@@ -1,0 +1,11 @@
+.agents/
+data/
+dist/
+docs/
+node_modules/
+public/fonts/
+src/lib/*.icloud-placeholder
+tests/
+tmp/
+*.pdf
+*.docx

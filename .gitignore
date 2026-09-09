@@ -1,0 +1,17 @@
+node_modules/
+dist/
+tmp/
+.DS_Store
+data/*.db-shm
+data/*.db-wal
+*.log
+.vercel
+.env*
+!.env.example
+.agents/
+skills-lock.json
+docs/__pycache__/
+docs/~$*.docx
+docs/
+src/lib/*.icloud-placeholder
+*.pdf
