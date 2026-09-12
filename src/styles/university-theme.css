@@ -1,4 +1,4 @@
-/* Northstar Academic Registry workspace. Keep the legacy --teal names as aliases
+/* HKUST Student Admission System workspace. Keep the legacy --teal names as aliases
    so existing workflows share the same accessible theme. */
 :root {
   --university-navy: #003366;
@@ -61,6 +61,12 @@
   border-bottom: 1px solid #335c85;
 }
 .brand-lockup .university-identity { display: flex; flex-direction: column; min-width: 0; gap: 14px; }
+.hkust-logo { display: block; width: min(172px, 100%); height: auto; object-fit: contain; object-position: left center; }
+.hkust-logo-reversed { width: 170px; max-height: 56px; }
+.compact-hkust-logo { display: block; width: 82px; height: 25px; object-fit: contain; object-position: left center; }
+.cycle-block label { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+.cycle-block select { width: 100%; min-width: 0; color: #fff; background: transparent; border: 0; font-size: 12px; font-weight: 600; }
+.cycle-block select option { color: var(--ink); background: #fff; }
 .registry-mark, .compact-registry-mark { display: grid; place-items: center; color: var(--university-navy); background: #e8c15b; border-radius: 10px; font-family: 'Source Serif 4', Georgia, serif; font-weight: 700; }
 .registry-mark { width: 42px; height: 42px; font-size: 25px; box-shadow: var(--shadow-control); }
 .compact-registry-mark { width: 28px; height: 28px; flex: 0 0 auto; font-size: 17px; }
@@ -157,6 +163,7 @@
 .stage-screening { --stage-accent: var(--blue); }
 .stage-review { --stage-accent: var(--university-bright-gold); }
 .stage-interview { --stage-accent: #986f4f; }
+.stage-waitlisted { --stage-accent: #72598f; }
 .stage-offered { --stage-accent: var(--university-navy); background: #f2f6fa; }
 .stage-accepted { --stage-accent: #218e61; background: #f2f6fa; }
 .progress-track { background: #e7edf3; }
@@ -424,7 +431,60 @@
   .register-refined .register-viewbar { align-items: center; }
   .register-refined .register-viewbar > .icon-button { width: 40px; height: 40px; border: 1px solid var(--line); background: #fff; box-shadow: var(--shadow-control); }
   .wizard-footer > .button:first-child, .wizard-footer > .button:last-child { width: 100%; min-width: 0; justify-self: stretch; }
+  .hkust-logo-reversed { width: 145px; }
+  .physical-object-grid, .interview-form { grid-template-columns: minmax(0, 1fr); }
+  .report-filter-bar label { min-width: min(100%, 160px); flex: 1 1 145px; }
+  .interview-complete-fields input { width: min(100%, 140px); }
 }
+.report-filter-bar { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; margin: 0 0 20px; padding: 14px 16px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius-control); box-shadow: var(--shadow-control); }
+.report-filter-bar label { display: grid; min-width: 170px; gap: 5px; color: var(--ink-soft); font-size: 10px; font-weight: 600; }
+.report-filter-bar select, .report-filter-bar input { min-height: 36px; padding: 0 10px; background: var(--surface-subtle); border: 1px solid var(--line-strong); border-radius: 6px; font-size: 12px; }
+.report-purpose { display: block; margin-top: 8px; color: var(--ink-soft); font-size: 11px; line-height: 1.5; }
+.physical-object-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.physical-object-group { min-width: 0; padding: 16px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius-control); box-shadow: var(--shadow-control); }
+.physical-object-group > header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; color: var(--university-navy); }
+.physical-object-group > header h3 { margin: 0; }
+.physical-object-group > header span { color: var(--ink-soft); font-size: 10px; }
+.physical-object-group details { border-top: 1px solid var(--line); }
+.physical-object-group summary { padding: 9px 2px; cursor: pointer; color: var(--ink); font: 500 11px 'IBM Plex Mono', monospace; }
+.physical-object-group pre { max-height: 180px; overflow: auto; margin: 0 0 10px; padding: 10px; color: #d8e7f5; background: var(--university-navy-dark); border-radius: 5px; font: 10px/1.5 'IBM Plex Mono', monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+.interview-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.interview-form .full-field, .interview-form .panel-picker, .interview-form > button { grid-column: 1 / -1; }
+.panel-picker { display: grid; gap: 8px; margin: 0; padding: 12px; border: 1px solid var(--line); border-radius: 6px; }
+.panel-picker legend { padding: 0 4px; color: var(--ink-soft); font-size: 10px; font-weight: 600; }
+.panel-picker label { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+.panel-picker label select { margin-left: auto; min-height: 30px; }
+.interview-record { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 10px; padding: 14px 0; border-top: 1px solid var(--line); }
+.interview-record > div:first-child { display: grid; min-width: 210px; flex: 1; gap: 4px; }
+.interview-record span, .interview-record small { color: var(--ink-soft); font-size: 11px; }
+.interview-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.interview-complete-fields { display: flex; flex-wrap: wrap; gap: 6px; }
+.interview-complete-fields input { width: 110px; min-height: 32px; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: 5px; font-size: 11px; }
+.waitlist-facts { display: flex; align-items: baseline; flex-wrap: wrap; gap: 16px; color: var(--ink-soft); }
+.waitlist-facts strong { color: var(--university-navy); font: 500 26px 'IBM Plex Mono', monospace; }
+.cycle-detail-panel { margin-top: 18px; padding: 20px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius-control); box-shadow: var(--shadow-control); }
+.cycle-detail-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.cycle-detail-header h2 { margin: 3px 0 4px; color: var(--university-navy); font-size: 20px; }
+.cycle-detail-header p { margin: 0; color: var(--ink-soft); font-size: 11px; }
+.cycle-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-top: 18px; }
+.cycle-detail-section { min-width: 0; padding: 16px; background: var(--surface-subtle); border: 1px solid var(--line); border-radius: 6px; }
+.section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 13px; }
+.section-heading h3 { margin: 3px 0 0; color: var(--university-navy); font-size: 15px; }
+.section-heading > span { color: var(--ink-soft); font: 10px 'IBM Plex Mono', monospace; }
+.inline-create-form { display: grid; grid-template-columns: 1.1fr .65fr 1fr auto; align-items: end; gap: 7px; margin-bottom: 12px; }
+.inline-create-form.requirement-form { grid-template-columns: .6fr 1fr 1fr auto; }
+.inline-create-form select, .inline-create-form input { width: 100%; min-width: 0; min-height: 34px; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: 5px; background: #fff; font-size: 11px; }
+.inline-create-form .button { min-height: 34px; padding-inline: 10px; white-space: nowrap; }
+.cycle-offering-list, .requirement-list { display: grid; gap: 6px; }
+.cycle-offering-row, .requirement-row { display: grid; grid-template-columns: minmax(0, 1fr) 68px 142px 34px; align-items: center; gap: 7px; padding: 9px 0; border-top: 1px solid var(--line); }
+.requirement-row { grid-template-columns: minmax(0, 1fr) 34px; }
+.cycle-offering-row > div, .requirement-row > div { display: grid; min-width: 0; gap: 3px; }
+.cycle-offering-row strong, .requirement-row strong { overflow: hidden; color: var(--ink); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.cycle-offering-row span, .requirement-row span { overflow: hidden; color: var(--ink-soft); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.cycle-offering-row input { width: 100%; min-height: 31px; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 5px; font: 10px 'IBM Plex Mono', monospace; }
+@media (max-width: 900px) { .cycle-detail-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 600px) { .cycle-detail-panel { padding: 14px; } .inline-create-form, .inline-create-form.requirement-form { grid-template-columns: repeat(2, minmax(0, 1fr)); } .inline-create-form .button { grid-column: 1 / -1; } .cycle-offering-row { grid-template-columns: minmax(0, 1fr) 64px 34px; } .cycle-offering-row input:nth-of-type(2) { grid-column: 1 / 3; } }
+
 @media (max-height: 600px) {
   .brand-lockup { min-height: 0; padding-top: 18px; padding-bottom: 16px; }
   .workspace-identity { margin-top: 18px; }

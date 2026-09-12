@@ -1,4 +1,4 @@
-// Northstar Academic Registry design tokens.
+// HKUST Student Admission System design tokens.
 export const universityColors = Object.freeze({
   navy: '#003366',
   gold: '#996600',

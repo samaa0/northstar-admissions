@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   ArrowRight,
   Award,
+  CalendarDays,
   BookOpen,
   Check,
   CheckCircle2,
@@ -35,10 +36,11 @@ import CaseBrief from './CaseBrief.jsx';
 
 const requiredDocuments = ['ID', 'TRANSCRIPT', 'PERSONAL_STATEMENT'];
 const documentTypes = ['ID', 'TRANSCRIPT', 'PERSONAL_STATEMENT', 'CV', 'REFERENCE'];
-const caseStages = ['SUBMITTED', 'SCREENING', 'REVIEW', 'INTERVIEW', 'OFFERED', 'ACCEPTED'];
+const caseStages = ['SUBMITTED', 'SCREENING', 'REVIEW', 'INTERVIEW', 'WAITLISTED', 'OFFERED', 'ACCEPTED'];
 const tabs = [
   { id: 'summary', label: 'Summary', icon: UserRound },
   { id: 'evidence', label: 'Evidence', icon: ClipboardCheck },
+  { id: 'interview', label: 'Interview', icon: CalendarDays },
   { id: 'decision', label: 'Decision', icon: Award },
   { id: 'activity', label: 'Activity', icon: Clock3 },
 ];
@@ -93,8 +95,9 @@ export default function ApplicationDrawer({ applicationId, onClose, onUpdated })
 
   const documentProgress = useMemo(() => {
     if (!data) return { verified: 0, total: requiredDocuments.length, percent: 0 };
-    const verified = data.documents.filter((document) => requiredDocuments.includes(document.document_type) && document.verification_status === 'VERIFIED').length;
-    return { verified, total: requiredDocuments.length, percent: Math.round((verified / requiredDocuments.length) * 100) };
+    const total = data.compliance?.required_count || data.requirements?.length || requiredDocuments.length;
+    const verified = data.compliance?.verified_count || data.documents.filter((document) => requiredDocuments.includes(document.document_type) && document.verification_status === 'VERIFIED').length;
+    return { verified, total, percent: total ? Math.round((verified / total) * 100) : 0 };
   }, [data]);
 
   const folioIndex = useMemo(() => {
@@ -122,7 +125,7 @@ export default function ApplicationDrawer({ applicationId, onClose, onUpdated })
 
   function changeStatus(status) {
     perform(status, `/applications/${applicationId}/status`, {
-      method: 'PATCH', body: JSON.stringify({ status, note: transitionNote }),
+      method: 'PATCH', body: JSON.stringify({ status, reason: transitionNote }),
     }, () => setTransitionNote(''));
   }
 
@@ -199,7 +202,7 @@ export default function ApplicationDrawer({ applicationId, onClose, onUpdated })
         variants={{ closed: { opacity: 0, x: 28 }, open: { opacity: 1, x: 0 } }}
       >
         <div className="drawer-topbar case-topbar">
-          <div><span>Northstar · Academic Registry</span><strong>Application case</strong></div>
+          <div><span>HKUST · Student Admission System</span><strong>Application case</strong></div>
           <button data-dialog-initial className="icon-button" type="button" onClick={onClose} aria-label="Close application details"><X size={19} /></button>
         </div>
         {error ? <div className="drawer-error" role="alert"><AlertTriangle size={16} />{error}<button type="button" onClick={() => setError('')} aria-label="Dismiss error"><X size={14} /></button></div> : null}
@@ -236,6 +239,7 @@ export default function ApplicationDrawer({ applicationId, onClose, onUpdated })
               {tab === 'summary' && !editingProfile ? <CaseBrief data={data} onEvidence={openEvidence} /> : null}
               {tab === 'summary' ? <SummaryPanel data={data} editing={editingProfile} setEditing={setEditingProfile} profile={profile} setProfile={setProfile} errors={profileErrors} busy={busy} onSubmit={saveProfile} /> : null}
               {tab === 'evidence' ? <EvidencePanel data={data} progress={documentProgress} newDocument={newDocument} setNewDocument={setNewDocument} busy={busy} onAdd={addDocument} onChangeStatus={changeDocument} /> : null}
+              {tab === 'interview' ? <InterviewPanel data={data} busy={busy} onUpdated={load} onError={setError} /> : null}
               {tab === 'decision' ? <DecisionPanel data={data} transitionNote={transitionNote} setTransitionNote={setTransitionNote} busy={busy} onStatus={changeStatus} onNominate={nominate} onNomination={changeNomination} /> : null}
               {tab === 'activity' ? <ActivityPanel data={data} note={note} setNote={setNote} busy={busy} onAddNote={addNote} /> : null}
             </div>
@@ -282,8 +286,8 @@ function EvidencePanel({ data, progress, newDocument, setNewDocument, busy, onAd
         <form className="document-register-form" onSubmit={onAdd}><label className="field"><span>Document type</span><select value={newDocument.documentType} onChange={(event) => setNewDocument((current) => ({ ...current, documentType: event.target.value }))} required><option value="">Select type</option>{documentTypes.map((type) => <option value={type} key={type} disabled={usedTypes.has(type)}>{titleCase(type)}{usedTypes.has(type) ? ' · registered' : ''}</option>)}</select></label><label className="field document-name-field"><span>Filename</span><input value={newDocument.fileName} onChange={(event) => setNewDocument((current) => ({ ...current, fileName: event.target.value }))} placeholder="transcript_2026.pdf" required /></label><button className="button button-primary" type="submit" disabled={busy === 'document-new'}>{busy === 'document-new' ? <LoaderCircle className="spin" size={16} /> : <PlusIcon />}Register</button></form>
       </section>
       <section className="case-section">
-        <header className="case-section-heading"><div><FileCheck2 size={17} /><div><h3>Evidence register</h3><p>{data.documents.length} document records</p></div></div></header>
-        <div className="document-register-list">{data.documents.map((document) => <article key={document.id} className={`document-record document-${document.verification_status.toLowerCase()}`}><span className="document-status-icon">{document.verification_status === 'VERIFIED' ? <FileCheck2 size={17} /> : document.verification_status === 'REJECTED' ? <ShieldAlert size={17} /> : <FileWarning size={17} />}</span><div><strong>{titleCase(document.document_type)}</strong><span className="mono-file">{document.file_name}</span><small>Registered {formatDate(document.uploaded_at)}{document.verifier ? ` · checked by ${document.verifier}` : ''}</small></div><StatusBadge status={document.verification_status} subtle /><div className="document-actions"><button className="icon-button action-verify" type="button" title="Verify document" aria-label={`Verify ${titleCase(document.document_type)}`} disabled={Boolean(busy)} onClick={() => onChangeStatus(document.id, 'VERIFIED')}><CheckCircle2 size={16} /></button><button className="icon-button action-reject" type="button" title="Reject document" aria-label={`Reject ${titleCase(document.document_type)}`} disabled={Boolean(busy)} onClick={() => onChangeStatus(document.id, 'REJECTED')}><XCircle size={16} /></button><button className="icon-button" type="button" title="Return to pending" aria-label={`Mark ${titleCase(document.document_type)} pending`} disabled={Boolean(busy)} onClick={() => onChangeStatus(document.id, 'PENDING')}><Clock3 size={16} /></button></div></article>)}</div>
+        <header className="case-section-heading"><div><FileCheck2 size={17} /><div><h3>Evidence register</h3><p>{progress.verified} verified · {progress.total - progress.verified} outstanding</p></div></div></header>
+        <div className="document-register-list">{(data.requirements || []).map((requirement) => { const document = data.documents.find(({ document_type: type }) => type === requirement.document_type); const status = document?.verification_status || 'MISSING'; return <article key={requirement.id} className={`document-record document-${status.toLowerCase()}`}><span className="document-status-icon">{status === 'VERIFIED' ? <FileCheck2 size={17} /> : status === 'REJECTED' ? <ShieldAlert size={17} /> : <FileWarning size={17} />}</span><div><strong>{titleCase(requirement.document_type)}</strong><span className="mono-file">{document?.file_name || 'Not registered'}</span><small>Required by {titleCase(requirement.required_by_status)}{document?.reviewer ? ` · checked by ${document.reviewer}` : ''}</small></div><StatusBadge status={status} subtle />{document ? <div className="document-actions"><button className="icon-button action-verify" type="button" title="Verify document" aria-label={`Verify ${titleCase(requirement.document_type)}`} disabled={Boolean(busy)} onClick={() => onChangeStatus(document.id, 'VERIFIED')}><CheckCircle2 size={16} /></button><button className="icon-button action-reject" type="button" title="Reject document" aria-label={`Reject ${titleCase(requirement.document_type)}`} disabled={Boolean(busy)} onClick={() => onChangeStatus(document.id, 'REJECTED')}><XCircle size={16} /></button><button className="icon-button" type="button" title="Return to pending" aria-label={`Mark ${titleCase(requirement.document_type)} pending`} disabled={Boolean(busy)} onClick={() => onChangeStatus(document.id, 'PENDING')}><Clock3 size={16} /></button></div> : null}</article>; })}</div>
       </section>
     </div>
   );
@@ -294,7 +298,7 @@ function DecisionPanel({ data, transitionNote, setTransitionNote, busy, onStatus
     <div id="case-panel-decision" className="case-panel decision-workspace" role="tabpanel" aria-labelledby="case-tab-decision">
       <section className="case-section decision-panel">
         <header className="case-section-heading"><div><ArrowRight size={17} /><div><h3>Application decision</h3><p>Current stage: {titleCase(data.application.status)}</p></div></div></header>
-        {data.allowedTransitions.length ? <><label className="field full-field"><span>Decision note <small>required for decline or withdrawal</small></span><textarea value={transitionNote} onChange={(event) => setTransitionNote(event.target.value)} placeholder="Record the rationale or next action" rows="3" maxLength="500" /></label><div className="transition-actions">{data.allowedTransitions.map((status) => <button type="button" key={status} className={`button ${['DECLINED', 'WITHDRAWN'].includes(status) ? 'button-danger-quiet' : ['ACCEPTED', 'OFFERED'].includes(status) ? 'button-primary' : 'button-secondary'}`} disabled={Boolean(busy) || (['DECLINED', 'WITHDRAWN'].includes(status) && transitionNote.trim().length < 5)} onClick={() => onStatus(status)}>{busy === status ? <LoaderCircle className="spin" size={16} /> : ['ACCEPTED', 'OFFERED'].includes(status) ? <Check size={16} /> : <ArrowRight size={16} />}{titleCase(status)}</button>)}</div></> : <div className="terminal-status"><Check size={17} /><span>This application has reached a final status.</span></div>}
+        {data.allowedTransitions.length ? <><label className="field full-field"><span>Decision note <small>required where marked by the workflow</small></span><textarea value={transitionNote} onChange={(event) => setTransitionNote(event.target.value)} placeholder="Record the rationale or next action" rows="3" maxLength="500" /></label><div className="transition-actions">{data.transitionRules?.map(({ status, requiresReason }) => <button type="button" key={status} className={`button ${['DECLINED', 'WITHDRAWN'].includes(status) ? 'button-danger-quiet' : ['ACCEPTED', 'OFFERED'].includes(status) ? 'button-primary' : 'button-secondary'}`} disabled={Boolean(busy) || (requiresReason && transitionNote.trim().length < 3)} onClick={() => onStatus(status)}>{busy === status ? <LoaderCircle className="spin" size={16} /> : ['ACCEPTED', 'OFFERED'].includes(status) ? <Check size={16} /> : <ArrowRight size={16} />}{titleCase(status)}</button>)}</div></> : <div className="terminal-status"><Check size={17} /><span>This application has reached a final status.</span></div>}
       </section>
 
       <section className="case-section scholarship-section">
@@ -302,8 +306,46 @@ function DecisionPanel({ data, transitionNote, setTransitionNote, busy, onStatus
         {data.nominations.length ? <div className="nomination-list">{data.nominations.map((item) => <article key={item.id}><span className="scholarship-mark"><Award size={17} /></span><div><strong>{item.name}</strong><span>{item.code} · HK${item.amount_hkd.toLocaleString('en-HK')}</span></div><StatusBadge status={item.status} subtle />{item.status === 'NOMINATED' ? <div><button className="button button-primary button-compact" type="button" disabled={Boolean(busy)} onClick={() => onNomination(item.id, 'AWARDED')}><Check size={14} />Award</button><button className="button button-danger-quiet button-compact" type="button" disabled={Boolean(busy)} onClick={() => onNomination(item.id, 'DECLINED')}><X size={14} />Decline</button></div> : item.status === 'AWARDED' ? <strong className="award-amount">HK${item.awarded_amount_hkd.toLocaleString('en-HK')}</strong> : null}</article>)}</div> : null}
         <div className="eligibility-list">{data.eligibleScholarships.map((item) => <article key={item.id} className={item.eligible ? 'eligible' : 'ineligible'}><div><strong>{item.name}</strong><span>{item.code} · minimum {item.minimum_score}</span></div><div className="eligibility-capacity"><strong>{item.available_places}</strong><small>places left</small></div>{item.nominated ? <span className="eligibility-note"><Check size={13} />Nominated</span> : item.eligible ? <button className="button button-secondary button-compact" type="button" disabled={Boolean(busy)} onClick={() => onNominate(item.id)}><Award size={14} />Nominate</button> : <span className="eligibility-note muted">Not eligible</span>}</article>)}</div>
       </section>
+      {data.waitlist ? <section className="case-section waitlist-card"><header className="case-section-heading"><div><Award size={17} /><div><h3>Waitlist position</h3><p>Capacity-aware ranking for the first-choice offering</p></div></div><StatusBadge status={data.waitlist.status} subtle /></header><div className="waitlist-facts"><strong>#{data.waitlist.waitlist_rank || '—'}</strong><span>{data.waitlist.ranking_score || '—'} ranking score</span><span>{data.waitlist.remaining_places} places remaining</span></div></section> : null}
     </div>
   );
+}
+
+function InterviewPanel({ data, busy, onUpdated, onError }) {
+  const [form, setForm] = useState({ applicationChoiceId: data.choices[0]?.id || '', scheduledAt: '', durationMinutes: '45', mode: 'ONLINE', location: 'Zoom admissions room', panelMemberIds: data.activeStaff.slice(0, 2).map(({ id }) => String(id)), chairId: String(data.activeStaff[0]?.id || '') });
+  const [score, setScore] = useState({});
+  const [saving, setSaving] = useState(false);
+  async function create(event) {
+    event.preventDefault();
+    setSaving(true);
+    try {
+      await api(`/applications/${data.application.id}/interviews`, { method: 'POST', body: JSON.stringify(form) });
+      await onUpdated();
+      setForm((current) => ({ ...current, scheduledAt: '' }));
+    } catch (error) { onError(error.message); } finally { setSaving(false); }
+  }
+  async function complete(interviewId) {
+    const values = score[interviewId] || {};
+    setSaving(true);
+    try {
+      await api(`/interviews/${interviewId}/complete`, { method: 'PATCH', body: JSON.stringify({ score: values.score, feedback: values.feedback }) });
+      await onUpdated();
+    } catch (error) { onError(error.message); } finally { setSaving(false); }
+  }
+  async function cancel(interviewId, status = 'CANCELLED') {
+    setSaving(true);
+    try { await api(`/interviews/${interviewId}/cancel`, { method: 'PATCH', body: JSON.stringify({ status }) }); await onUpdated(); }
+    catch (error) { onError(error.message); } finally { setSaving(false); }
+  }
+  function togglePanel(id) {
+    setForm((current) => ({ ...current, panelMemberIds: current.panelMemberIds.includes(String(id)) ? current.panelMemberIds.filter((value) => value !== String(id)) : [...current.panelMemberIds, String(id)] }));
+  }
+  return <div id="case-panel-interview" className="case-panel interview-panel" role="tabpanel" aria-labelledby="case-tab-interview">
+    <section className="case-section"><header className="case-section-heading"><div><CalendarDays size={17} /><div><h3>Schedule interview</h3><p>Panel conflicts and completion rules are enforced by the database.</p></div></div></header>
+      <form className="interview-form" onSubmit={create}><label className="field"><span>Choice</span><select value={form.applicationChoiceId} onChange={(event) => setForm((current) => ({ ...current, applicationChoiceId: event.target.value }))}>{data.choices.map((choice) => <option key={choice.id} value={choice.id}>{choice.code} · preference {choice.preference_rank}</option>)}</select></label><label className="field"><span>Scheduled at</span><input type="datetime-local" value={form.scheduledAt} onChange={(event) => setForm((current) => ({ ...current, scheduledAt: event.target.value ? new Date(event.target.value).toISOString() : '' }))} required /></label><label className="field"><span>Duration</span><input type="number" min="15" max="240" value={form.durationMinutes} onChange={(event) => setForm((current) => ({ ...current, durationMinutes: event.target.value }))} required /></label><label className="field"><span>Mode</span><select value={form.mode} onChange={(event) => setForm((current) => ({ ...current, mode: event.target.value }))}><option value="ONLINE">Online</option><option value="IN_PERSON">In person</option><option value="HYBRID">Hybrid</option></select></label><label className="field full-field"><span>Location</span><input value={form.location} onChange={(event) => setForm((current) => ({ ...current, location: event.target.value }))} required /></label><fieldset className="panel-picker"><legend>Panel members</legend>{data.activeStaff.map((staff) => <label key={staff.id}><input type="checkbox" checked={form.panelMemberIds.includes(String(staff.id))} onChange={() => togglePanel(staff.id)} /><span>{staff.name}</span><select value={String(form.chairId) === String(staff.id) ? 'CHAIR' : 'MEMBER'} onChange={(event) => setForm((current) => ({ ...current, chairId: event.target.value === 'CHAIR' ? String(staff.id) : current.chairId }))}><option value="MEMBER">Member</option><option value="CHAIR">Chair</option></select></label>)}</fieldset><button className="button button-primary" type="submit" disabled={saving || !form.scheduledAt}><Plus size={15} />Schedule interview</button></form>
+    </section>
+    <section className="case-section"><header className="case-section-heading"><div><ClipboardCheck size={17} /><div><h3>Interview sessions</h3><p>{data.interviews.length} scheduled or historical sessions</p></div></div></header>{data.interviews.length ? <div className="interview-list">{data.interviews.map((interview) => <article className="interview-record" key={interview.id}><div><strong>{interview.code} · {titleCase(interview.status)}</strong><span>{formatDateTime(interview.scheduled_at)} · {interview.duration_minutes} min · {interview.mode}</span><small>{interview.location} · {interview.panel || 'No panel assigned'}</small></div><StatusBadge status={interview.status} subtle />{interview.status === 'SCHEDULED' ? <div className="interview-actions"><button className="button button-secondary button-compact" type="button" onClick={() => cancel(interview.id, 'NO_SHOW')} disabled={saving}>No-show</button><button className="button button-danger-quiet button-compact" type="button" onClick={() => cancel(interview.id)} disabled={saving}>Cancel</button><div className="interview-complete-fields"><input aria-label="Interview score" type="number" min="0" max="100" placeholder="Score" value={score[interview.id]?.score || ''} onChange={(event) => setScore((current) => ({ ...current, [interview.id]: { ...current[interview.id], score: event.target.value } }))} /><input aria-label="Interview feedback" placeholder="Feedback" value={score[interview.id]?.feedback || ''} onChange={(event) => setScore((current) => ({ ...current, [interview.id]: { ...current[interview.id], feedback: event.target.value } }))} /><button className="button button-primary button-compact" type="button" onClick={() => complete(interview.id)} disabled={saving}>Complete</button></div></div> : interview.status === 'COMPLETED' ? <strong className="score-value">{Number(interview.score).toFixed(1)}</strong> : null}</article>)}</div> : <EmptyState title="No interview sessions" detail="Schedule a session when an application reaches the interview stage." />}</section>
+  </div>;
 }
 
 function ActivityPanel({ data, note, setNote, busy, onAddNote }) {

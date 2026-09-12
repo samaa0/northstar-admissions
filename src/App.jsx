@@ -49,10 +49,20 @@ export default function App() {
   const [toast, setToast] = useState(null);
   const [applicationStatus, setApplicationStatus] = useState('');
   const [searchRequest, setSearchRequest] = useState(0);
+  const [cycles, setCycles] = useState([]);
+  const [cycleId, setCycleId] = useState('');
 
   useEffect(() => {
-    api('/programmes').then(setProgrammes).catch(() => setToast({ type: 'error', message: 'Could not load programme data' }));
+    api('/cycles').then((records) => {
+      setCycles(records);
+      setCycleId((current) => current || String(records.find(({ status }) => status === 'OPEN')?.id || records[0]?.id || ''));
+    }).catch(() => setToast({ type: 'error', message: 'Could not load admission cycles' }));
   }, []);
+
+  useEffect(() => {
+    if (!cycleId) return;
+    api(`/programmes?cycleId=${cycleId}`).then(setProgrammes).catch(() => setToast({ type: 'error', message: 'Could not load programme data' }));
+  }, [cycleId]);
 
   useEffect(() => {
     if (!toast) return undefined;
@@ -90,8 +100,10 @@ export default function App() {
   function handleUpdated(message) {
     setRefreshKey((key) => key + 1);
     setToast({ type: 'success', message });
-    api('/programmes').then(setProgrammes).catch(() => {});
+    if (cycleId) api(`/programmes?cycleId=${cycleId}`).then(setProgrammes).catch(() => {});
   }
+
+  const currentCycle = cycles.find(({ id }) => String(id) === String(cycleId));
 
   return (
     <MotionConfig reducedMotion="user" transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}>
@@ -99,13 +111,13 @@ export default function App() {
       <a className="skip-link" href="#main-content">Skip to main content</a>
       <aside className={`sidebar ${mobileNav ? 'sidebar-open' : ''}`}>
         <div className="brand-lockup">
-          <div className="university-identity" aria-label="Northstar Academic Registry">
-            <div className="registry-mark" aria-hidden="true">N</div>
-            <span className="university-name">Academic Registry<br />Admissions workspace</span>
+          <div className="university-identity" aria-label="The Hong Kong University of Science and Technology">
+            <img className="hkust-logo hkust-logo-reversed" src="/hkust-logo-white.svg" alt="HKUST logo" />
+            <span className="university-name">香港科技大學<br />Student Admission System</span>
           </div>
           <button className="icon-button mobile-only sidebar-close" type="button" onClick={() => setMobileNav(false)} aria-label="Close navigation"><X size={18} /></button>
         </div>
-        <div className="workspace-identity"><strong>Academic Registry</strong><span>Student admissions workspace</span></div>
+        <div className="workspace-identity"><strong>HKUST</strong><span>Student Admission System</span></div>
         <nav className="primary-nav" aria-label="Main navigation">
           <span className="nav-label">Workspace</span>
           {navigation.map(({ id, label, icon: Icon }) => (
@@ -118,10 +130,10 @@ export default function App() {
         </nav>
         <div className="cycle-block">
           <div className="cycle-icon"><FileClock size={18} /></div>
-          <div><span>Demonstration cycle</span><strong>2027 intake</strong><small>Closes 15 Oct 2026</small></div>
+          <label><span>Admission cycle</span><select aria-label="Current admission cycle" value={cycleId} onChange={(event) => setCycleId(event.target.value)}>{cycles.map((cycle) => <option key={cycle.id} value={cycle.id}>{cycle.cycle_year} · {cycle.status}</option>)}</select><small>{currentCycle ? `${currentCycle.application_count} applications` : 'Loading cycles'}</small></label>
         </div>
         <div className="sidebar-project" aria-label="Demo workspace">
-          <span>NORTHSTAR · DEMO</span>
+          <span>HKUST · COURSEWORK DEMO</span>
           <strong>Admissions workspace</strong>
           <small>Fictional records</small>
         </div>
@@ -139,7 +151,7 @@ export default function App() {
           <div className="topbar-title">
             <button className="icon-button mobile-only" type="button" onClick={() => setMobileNav(true)} aria-label="Open navigation"><Menu size={20} /></button>
             <div className="workspace-heading">
-            <span className="workspace-context"><span className="context-university-name">NORTHSTAR</span><span className="compact-registry-mark" aria-hidden="true">N</span><span className="context-divider" aria-hidden="true">/</span><span className="context-project-name">Academic Registry</span><span className="context-project-short">Registry</span></span>
+            <span className="workspace-context"><span className="context-university-name">HKUST</span><img className="compact-hkust-logo" src="/hkust-logo-color.svg" alt="" aria-hidden="true" /><span className="context-divider" aria-hidden="true">/</span><span className="context-project-name">Student Admission System</span><span className="context-project-short">Admissions</span></span>
             <AnimatePresence mode="wait" initial={false}>
               <motion.div className="topbar-current" key={view} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 6 }}>
                 <activeNav.icon size={18} className="title-icon" />
@@ -159,18 +171,18 @@ export default function App() {
           <AnimatePresence mode="wait" initial={false}>
             <motion.div className="page-motion" key={view} initial={{ opacity: 0, y: 9 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}>
               <Suspense fallback={<LoadingBlock label="Opening workspace" />}>
-                {view === 'dashboard' ? <DashboardPage key={`d-${refreshKey}`} onOpenApplication={setSelectedApplication} onViewAll={navigateApplications} /> : null}
-                {view === 'applications' ? <ApplicationsPage key={`a-${refreshKey}`} programmes={programmes} initialStatus={applicationStatus} focusSearchRequest={searchRequest} onOpenApplication={setSelectedApplication} onNewApplicant={() => setIntakeOpen(true)} /> : null}
-                {view === 'operations' ? <OperationsPage onUpdated={handleUpdated} /> : null}
-                {view === 'reports' ? <ReportsPage /> : null}
+                {view === 'dashboard' ? <DashboardPage key={`d-${refreshKey}-${cycleId}`} cycleId={cycleId} cycle={currentCycle} onOpenApplication={setSelectedApplication} onViewAll={navigateApplications} /> : null}
+                {view === 'applications' ? <ApplicationsPage key={`a-${refreshKey}-${cycleId}`} cycleId={cycleId} cycle={currentCycle} programmes={programmes} initialStatus={applicationStatus} focusSearchRequest={searchRequest} onOpenApplication={setSelectedApplication} onNewApplicant={() => setIntakeOpen(true)} /> : null}
+                {view === 'operations' ? <OperationsPage cycles={cycles} cycleId={cycleId} onCycleChange={setCycleId} onUpdated={handleUpdated} /> : null}
+                {view === 'reports' ? <ReportsPage cycles={cycles} cycleId={cycleId} onCycleChange={setCycleId} /> : null}
                 {view === 'model' ? <DataModelPage /> : null}
               </Suspense>
             </motion.div>
           </AnimatePresence>
           <footer className="project-notice">
-            <span>Northstar <span aria-hidden="true">·</span> Student admissions system</span>
-            <span className="project-author">Demonstration workspace</span>
-            <span>Fictional records for demonstration. Not an official service.</span>
+            <span>HKUST Student Admission System</span>
+            <span className="project-author">ISOM5260 demonstration</span>
+            <span>Student coursework demonstration. Fictional records. Not an official HKUST service.</span>
           </footer>
         </main>
       </div>
@@ -190,7 +202,7 @@ export default function App() {
         ) : null}
       </AnimatePresence>
       <AnimatePresence>
-        {intakeOpen ? <IntakeDialog programmes={programmes} onClose={() => setIntakeOpen(false)} onCreated={handleCreated} /> : null}
+        {intakeOpen ? <IntakeDialog programmes={programmes} cycles={cycles} initialCycleId={cycleId} onClose={() => setIntakeOpen(false)} onCreated={handleCreated} /> : null}
       </AnimatePresence>
       <AnimatePresence><Toast toast={toast} onClose={() => setToast(null)} /></AnimatePresence>
     </div>

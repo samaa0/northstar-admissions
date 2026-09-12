@@ -5,9 +5,9 @@ import { api } from '../lib/api.js';
 import { formatDate, titleCase } from '../lib/format.js';
 import { EmptyState, Hint, LoadingBlock, RecordAvatar, StatusBadge } from './Ui.jsx';
 
-const statusOptions = ['SUBMITTED', 'SCREENING', 'REVIEW', 'INTERVIEW', 'OFFERED', 'ACCEPTED', 'DECLINED', 'WITHDRAWN'];
+const statusOptions = ['DRAFT', 'SUBMITTED', 'SCREENING', 'REVIEW', 'INTERVIEW', 'WAITLISTED', 'OFFERED', 'ACCEPTED', 'DECLINED', 'WITHDRAWN'];
 
-export default function ApplicationsPage({ programmes, initialStatus = '', focusSearchRequest = 0, onOpenApplication, onNewApplicant }) {
+export default function ApplicationsPage({ cycleId, cycle, programmes, initialStatus = '', focusSearchRequest = 0, onOpenApplication, onNewApplicant }) {
   const [filters, setFilters] = useState({ q: '', status: initialStatus, programme: '', page: 1 });
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
@@ -25,6 +25,7 @@ export default function ApplicationsPage({ programmes, initialStatus = '', focus
     const timer = window.setTimeout(() => {
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => value && params.set(key, value));
+      params.set('cycleId', cycleId);
       api(`/applicants?${params}`, { signal: controller.signal })
         .then((response) => !controller.signal.aborted && setResult(response))
         .catch((requestError) => !controller.signal.aborted && setError(requestError.message))
@@ -34,7 +35,7 @@ export default function ApplicationsPage({ programmes, initialStatus = '', focus
       controller.abort();
       window.clearTimeout(timer);
     };
-  }, [filters, retry]);
+  }, [cycleId, filters, retry]);
 
   useEffect(() => {
     function focusSearch(event) {
@@ -80,13 +81,13 @@ export default function ApplicationsPage({ programmes, initialStatus = '', focus
   return (
     <div className={`applications-page page-stack register-refined density-${density}`}>
       <div className="page-intro register-intro">
-        <div><span className="eyebrow">2027 intake · live register</span><h1>Application register</h1><p>Review progress, programme choice, ownership and exceptions from one operational queue.</p></div>
+        <div><span className="eyebrow">{cycle?.cycle_year || 'Admission'} cycle · live register</span><h1>Application register</h1><p>Review progress, programme choice, ownership and exceptions from one operational queue.</p></div>
         <button className="button button-primary desktop-intake" type="button" onClick={onNewApplicant}><Plus size={17} />Add applicant</button>
       </div>
 
       <div className="register-viewbar">
         <div className="register-quick-views" role="group" aria-label="Quick stage filters">
-          {[['', 'All applications'], ['SUBMITTED', 'New submissions'], ['REVIEW', 'Academic review'], ['INTERVIEW', 'Interview'], ['OFFERED', 'Offers']].map(([value, label]) => <button key={value} type="button" aria-pressed={filters.status === value} onClick={() => updateFilter('status', value)}>{value ? <span className={`stage-dot stage-dot-${value.toLowerCase()}`} aria-hidden="true" /> : <List size={15} />}{label}</button>)}
+          {[['', 'All applications'], ['SUBMITTED', 'New submissions'], ['REVIEW', 'Academic review'], ['INTERVIEW', 'Interview'], ['WAITLISTED', 'Waitlist'], ['OFFERED', 'Offers']].map(([value, label]) => <button key={value} type="button" aria-pressed={filters.status === value} onClick={() => updateFilter('status', value)}>{value ? <span className={`stage-dot stage-dot-${value.toLowerCase()}`} aria-hidden="true" /> : <List size={15} />}{label}</button>)}
         </div>
         <Hint label="Reload the current register"><button type="button" className="icon-button" aria-label="Refresh register" disabled={loading} onClick={() => setRetry((value) => value + 1)}><RefreshCw size={16} className={loading ? 'spin' : ''} /></button></Hint>
       </div>

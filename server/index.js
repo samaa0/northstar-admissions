@@ -16,7 +16,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const server = app.listen(port, '127.0.0.1', () => {
-  console.log(`Northstar API listening on http://127.0.0.1:${port}`);
+  console.log(`HKUST Student Admission System API listening on http://127.0.0.1:${port}`);
 });
 
 function shutdown() {

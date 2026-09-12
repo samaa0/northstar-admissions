@@ -5,9 +5,9 @@ import { api } from '../lib/api.js';
 import { formatDate, formatDateTime, titleCase } from '../lib/format.js';
 import { AnimatedNumber, EmptyState, Hint, LoadingBlock, RecordAvatar, SectionHeader, StatusBadge } from './Ui.jsx';
 
-const stageOrder = ['SUBMITTED', 'SCREENING', 'REVIEW', 'INTERVIEW', 'OFFERED', 'ACCEPTED'];
+const stageOrder = ['SUBMITTED', 'SCREENING', 'REVIEW', 'INTERVIEW', 'WAITLISTED', 'OFFERED', 'ACCEPTED'];
 
-export default function DashboardPage({ onOpenApplication, onViewAll }) {
+export default function DashboardPage({ cycleId, cycle, onOpenApplication, onViewAll }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
   const [refreshedAt, setRefreshedAt] = useState(null);
@@ -19,12 +19,12 @@ export default function DashboardPage({ onOpenApplication, onViewAll }) {
     const controller = new AbortController();
     setRefreshing(true);
     setError('');
-    api('/dashboard', { signal: controller.signal }).then((result) => {
+    api(`/dashboard?cycleId=${cycleId}`, { signal: controller.signal }).then((result) => {
       if (!controller.signal.aborted) { setData(result); setRefreshedAt(new Date().toISOString()); }
     }).catch((requestError) => { if (!controller.signal.aborted) setError(requestError.message); })
       .finally(() => { if (!controller.signal.aborted) setRefreshing(false); });
     return () => controller.abort();
-  }, [refresh]);
+  }, [cycleId, refresh]);
 
   const pipeline = useMemo(() => {
     if (!data) return [];
@@ -44,7 +44,7 @@ export default function DashboardPage({ onOpenApplication, onViewAll }) {
     { label: 'Offer yield', value: data.metrics.yieldRate, suffix: '%', context: 'Current admission cycle', icon: ArrowRight, status: 'ACCEPTED' },
   ];
   const attentionCount = data.attention.length;
-  const cycleDeadline = new Date('2026-10-15T23:59:59+08:00');
+  const cycleDeadline = new Date(cycle?.closes_at || data.currentCycle.closes_at);
   const now = new Date();
   const todayStart = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
   const deadlineStart = Date.UTC(cycleDeadline.getFullYear(), cycleDeadline.getMonth(), cycleDeadline.getDate());
@@ -66,11 +66,11 @@ export default function DashboardPage({ onOpenApplication, onViewAll }) {
     <div className="dashboard-page page-stack">
       <div className="page-intro dashboard-intro">
         <div>
-          <span className="eyebrow">Academic Registry <span aria-hidden="true">/</span> 2027 intake</span>
+          <span className="eyebrow">HKUST Admissions <span aria-hidden="true">/</span> {cycle?.cycle_year || data.currentCycle.cycle_year} cycle</span>
           <h1>Admissions overview</h1>
           <p>{attentionSummary} Your daily view of applications, decisions and programme capacity.</p>
         </div>
-        <div className="overview-date-block"><span className="overview-date">{todayLabel}</span><div className="overview-actions"><Hint label="Refresh admissions data"><button type="button" className="icon-button" aria-label="Refresh overview" disabled={refreshing} onClick={() => setRefresh((value) => value + 1)}><RefreshCw size={17} className={refreshing ? 'spin' : ''} /></button></Hint><div className="deadline-chip"><CalendarDays size={17} /><div><span>Demo deadline · {formatDate(cycleDeadline)}</span><strong>{daysRemaining} days remaining</strong></div></div></div></div>
+        <div className="overview-date-block"><span className="overview-date">{todayLabel}</span><div className="overview-actions"><Hint label="Refresh admissions data"><button type="button" className="icon-button" aria-label="Refresh overview" disabled={refreshing} onClick={() => setRefresh((value) => value + 1)}><RefreshCw size={17} className={refreshing ? 'spin' : ''} /></button></Hint><div className="deadline-chip"><CalendarDays size={17} /><div><span>Cycle closes · {formatDate(cycleDeadline)}</span><strong>{data.currentCycle.status === 'CLOSED' ? 'Cycle closed' : `${daysRemaining} days remaining`}</strong></div></div></div></div>
       </div>
 
       <section className="metric-strip" aria-label="Admission metrics">

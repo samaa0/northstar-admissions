@@ -6,7 +6,7 @@ import { useDialogFocus } from '../lib/useDialogFocus.js';
 
 const initialForm = {
   firstName: '', lastName: '', preferredName: '', email: '', phone: '', nationality: '', birthDate: '',
-  institution: '', qualification: '', fieldOfStudy: '', grade: '', graduationYear: '2026',
+  institution: '', qualification: '', fieldOfStudy: '', grade: '', graduationYear: '2026', cycleId: '', degreeLevel: 'UG',
 };
 
 const steps = [
@@ -17,11 +17,12 @@ const steps = [
 
 function createChoice() {
   const clientId = globalThis.crypto?.randomUUID?.() || `choice-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  return { clientId, programmeId: '', academicScore: '' };
+  return { clientId, offeringId: '', academicScore: '' };
 }
 
-export default function IntakeDialog({ programmes, onClose, onCreated }) {
-  const [form, setForm] = useState(initialForm);
+export default function IntakeDialog({ programmes, cycles, initialCycleId, onClose, onCreated }) {
+  const [form, setForm] = useState(() => ({ ...initialForm, cycleId: String(initialCycleId || '') }));
+  const [offerings, setOfferings] = useState(programmes);
   const [choices, setChoices] = useState(() => [createChoice()]);
   const [step, setStep] = useState(0);
   const [errors, setErrors] = useState({});
@@ -31,7 +32,16 @@ export default function IntakeDialog({ programmes, onClose, onCreated }) {
   const confirmationRef = useRef(null);
 
   const dirty = useMemo(() => Object.entries(form).some(([key, value]) => key !== 'graduationYear' && String(value).trim())
-    || choices.some((choice) => choice.programmeId || choice.academicScore), [choices, form]);
+    || choices.some((choice) => choice.offeringId || choice.academicScore), [choices, form]);
+
+  useEffect(() => {
+    if (!form.cycleId) return;
+    const controller = new AbortController();
+    api(`/programmes?cycleId=${form.cycleId}`, { signal: controller.signal }).then((result) => {
+      if (!controller.signal.aborted) setOfferings(result);
+    }).catch(() => {});
+    return () => controller.abort();
+  }, [form.cycleId]);
 
   const requestClose = useCallback(() => {
     if (dirty) setConfirmClose(true);
@@ -47,6 +57,7 @@ export default function IntakeDialog({ programmes, onClose, onCreated }) {
 
   function updateField(key, value) {
     setForm((current) => ({ ...current, [key]: value }));
+    if (key === 'cycleId' || key === 'degreeLevel') setChoices([createChoice()]);
     setErrors((current) => ({ ...current, [key]: undefined }));
     setMessage('');
   }
@@ -68,7 +79,7 @@ export default function IntakeDialog({ programmes, onClose, onCreated }) {
   function validateStep(index) {
     const nextErrors = {};
     if (index === 0) {
-      ['firstName', 'lastName', 'email', 'phone', 'nationality', 'birthDate'].forEach((key) => {
+      ['cycleId', 'degreeLevel', 'firstName', 'lastName', 'email', 'phone', 'nationality', 'birthDate'].forEach((key) => {
         if (!String(form[key]).trim()) nextErrors[key] = 'This field is required';
       });
       if (form.email && !/^\S+@\S+\.\S+$/.test(form.email)) nextErrors.email = 'Enter a valid email address';
@@ -80,11 +91,11 @@ export default function IntakeDialog({ programmes, onClose, onCreated }) {
     }
     if (index === 2) {
       choices.forEach((choice, choiceIndex) => {
-        if (!choice.programmeId) nextErrors[`choices.${choiceIndex}.programmeId`] = 'Select a programme';
+        if (!choice.offeringId) nextErrors[`choices.${choiceIndex}.offeringId`] = 'Select a programme offering';
         if (choice.academicScore === '') nextErrors[`choices.${choiceIndex}.academicScore`] = 'Enter an academic score';
         else if (Number(choice.academicScore) < 0 || Number(choice.academicScore) > 100) nextErrors[`choices.${choiceIndex}.academicScore`] = 'Use a score from 0 to 100';
       });
-      const ids = choices.map(({ programmeId }) => String(programmeId)).filter(Boolean);
+      const ids = choices.map(({ offeringId }) => String(offeringId)).filter(Boolean);
       if (new Set(ids).size !== ids.length) nextErrors.choices = 'Programme choices must be unique';
     }
     setErrors((current) => ({ ...current, ...nextErrors }));
@@ -113,7 +124,7 @@ export default function IntakeDialog({ programmes, onClose, onCreated }) {
     try {
       const result = await api('/applicants', {
         method: 'POST',
-        body: JSON.stringify({ ...form, choices: choices.map(({ programmeId, academicScore }) => ({ programmeId, academicScore })) }),
+        body: JSON.stringify({ ...form, choices: choices.map(({ offeringId, academicScore }) => ({ offeringId, academicScore })) }),
       });
       onCreated(result.message, result.applicationId);
     } catch (requestError) {
@@ -130,7 +141,10 @@ export default function IntakeDialog({ programmes, onClose, onCreated }) {
     }
   }
 
-  const chosenIds = new Set(choices.map((choice) => String(choice.programmeId)).filter(Boolean));
+  const chosenIds = new Set(choices.map((choice) => String(choice.offeringId)).filter(Boolean));
+  const availableOfferings = offerings.filter((offering) => offering.degree_level === form.degreeLevel
+    && offering.active === 1 && offering.offering_active === 1 && new Date(offering.deadline) >= new Date());
+  const selectedCycle = cycles.find(({ id }) => String(id) === String(form.cycleId));
 
   return (
     <motion.div className="modal-layer" role="presentation" initial="closed" animate="open" exit="closed">
@@ -145,7 +159,7 @@ export default function IntakeDialog({ programmes, onClose, onCreated }) {
         variants={{ closed: { opacity: 0, y: 10 }, open: { opacity: 1, y: 0 } }}
       >
         <header className="intake-header wizard-header" inert={confirmClose || undefined} aria-hidden={confirmClose || undefined}>
-          <div><span className="eyebrow">2027 intake</span><h2 id="intake-title">New applicant</h2><p>Build a submitted application record in three short stages.</p></div>
+          <div><span className="eyebrow">{selectedCycle?.cycle_year || 'Admission'} cycle</span><h2 id="intake-title">New applicant</h2><p>Build a submitted application record in three short stages.</p></div>
           <button className="icon-button" type="button" onClick={requestClose} aria-label="Close applicant intake"><X size={19} /></button>
         </header>
 
@@ -168,6 +182,8 @@ export default function IntakeDialog({ programmes, onClose, onCreated }) {
                   <>
                     <PanelHeading icon={UserRound} title="Identity and contact" copy="Use the applicant's legal details and current contact information." id="wizard-panel-title-0" />
                     <div className="form-grid">
+                      <label className={`field ${errors.cycleId ? 'field-error' : ''}`}><span>Admission cycle</span><select name="cycleId" value={form.cycleId} onChange={(event) => updateField('cycleId', event.target.value)} required data-dialog-initial>{cycles.filter(({ status }) => status === 'OPEN').map((cycle) => <option key={cycle.id} value={cycle.id}>{cycle.name}</option>)}</select>{errors.cycleId ? <small>{errors.cycleId}</small> : null}</label>
+                      <label className={`field ${errors.degreeLevel ? 'field-error' : ''}`}><span>Degree level</span><select name="degreeLevel" value={form.degreeLevel} onChange={(event) => updateField('degreeLevel', event.target.value)} required><option value="UG">Undergraduate</option><option value="PG">Postgraduate</option></select>{errors.degreeLevel ? <small>{errors.degreeLevel}</small> : null}</label>
                       <Field label="First name" name="firstName" value={form.firstName} error={errors.firstName} onChange={updateField} required data-dialog-initial />
                       <Field label="Last name" name="lastName" value={form.lastName} error={errors.lastName} onChange={updateField} required />
                       <Field label="Preferred name" name="preferredName" value={form.preferredName} error={errors.preferredName} onChange={updateField} placeholder="Optional" />
@@ -199,17 +215,13 @@ export default function IntakeDialog({ programmes, onClose, onCreated }) {
                       {choices.map((choice, index) => (
                         <div className="choice-editor" key={choice.clientId}>
                           <span className="choice-rank">{index + 1}</span>
-                          <label className={`field choice-programme ${errors[`choices.${index}.programmeId`] ? 'field-error' : ''}`}>
-                            <span>Programme</span>
-                            <select data-dialog-initial={index === 0 ? true : undefined} value={choice.programmeId} onChange={(event) => updateChoice(index, 'programmeId', event.target.value)} required>
+                          <label className={`field choice-programme ${errors[`choices.${index}.offeringId`] ? 'field-error' : ''}`}>
+                            <span>Programme offering</span>
+                            <select data-dialog-initial={index === 0 ? true : undefined} value={choice.offeringId} onChange={(event) => updateChoice(index, 'offeringId', event.target.value)} required>
                               <option value="">Select programme</option>
-                              {['UG', 'PG'].map((level) => (
-                                <optgroup label={level === 'UG' ? 'Undergraduate' : 'Postgraduate'} key={level}>
-                                  {programmes.filter((programme) => programme.degree_level === level).map((programme) => <option key={programme.id} value={programme.id} disabled={chosenIds.has(String(programme.id)) && String(choice.programmeId) !== String(programme.id)}>{programme.code} · {programme.name}</option>)}
-                                </optgroup>
-                              ))}
+                              {availableOfferings.map((programme) => <option key={programme.offeringId} value={programme.offeringId} disabled={chosenIds.has(String(programme.offeringId)) && String(choice.offeringId) !== String(programme.offeringId)}>{programme.code} · {programme.name} · {programme.remaining_places} places remain</option>)}
                             </select>
-                            {errors[`choices.${index}.programmeId`] ? <small>{errors[`choices.${index}.programmeId`]}</small> : null}
+                            {errors[`choices.${index}.offeringId`] ? <small>{errors[`choices.${index}.offeringId`]}</small> : null}
                           </label>
                           <label className={`field choice-score ${errors[`choices.${index}.academicScore`] ? 'field-error' : ''}`}><span>Academic score</span><div className="score-input"><input type="number" min="0" max="100" step="0.1" value={choice.academicScore} onChange={(event) => updateChoice(index, 'academicScore', event.target.value)} placeholder="0.0" required /><span>/100</span></div>{errors[`choices.${index}.academicScore`] ? <small>{errors[`choices.${index}.academicScore`]}</small> : null}</label>
                           {choices.length > 1 ? <button className="icon-button remove-choice" type="button" onClick={() => removeChoice(index)} aria-label={`Remove choice ${index + 1}`}><X size={16} /></button> : null}
@@ -221,7 +233,7 @@ export default function IntakeDialog({ programmes, onClose, onCreated }) {
                   </>
                 ) : null}
 
-                {step === 3 ? <ReviewPanel form={form} choices={choices} programmes={programmes} /> : null}
+                {step === 3 ? <ReviewPanel form={form} choices={choices} programmes={availableOfferings} cycle={selectedCycle} /> : null}
               </motion.section>
             </AnimatePresence>
           </div>
@@ -252,14 +264,14 @@ function PanelHeading({ icon: Icon, title, copy, id }) {
   return <div className="wizard-panel-heading"><span><Icon size={18} /></span><div><h3 id={id}>{title}</h3><p>{copy}</p></div></div>;
 }
 
-function ReviewPanel({ form, choices, programmes }) {
+function ReviewPanel({ form, choices, programmes, cycle }) {
   return (
     <div className="review-panel">
       <PanelHeading icon={Check} title="Review application" copy="Confirm the record before it enters the submitted queue." id="wizard-panel-title-3" />
       <div className="review-sections">
-        <section><span>Identity</span><h4>{form.firstName} {form.lastName}</h4><p>{form.email}<br />{form.phone}<br />{form.nationality} · born {form.birthDate}</p></section>
+        <section><span>Identity</span><h4>{form.firstName} {form.lastName}</h4><p>{cycle?.name} · {form.degreeLevel}<br />{form.email}<br />{form.phone}<br />{form.nationality} · born {form.birthDate}</p></section>
         <section><span>Education</span><h4>{form.institution}</h4><p>{form.qualification} · {form.fieldOfStudy}<br />{form.grade} · {form.graduationYear}</p></section>
-        <section><span>Programme choices</span>{choices.map((choice, index) => { const programme = programmes.find(({ id }) => String(id) === String(choice.programmeId)); return <div className="review-choice" key={choice.clientId}><strong>{index + 1}</strong><span><b>{programme?.code}</b>{programme?.name}</span><code>{Number(choice.academicScore).toFixed(1)}</code></div>; })}</section>
+        <section><span>Programme choices</span>{choices.map((choice, index) => { const programme = programmes.find(({ offeringId }) => String(offeringId) === String(choice.offeringId)); return <div className="review-choice" key={choice.clientId}><strong>{index + 1}</strong><span><b>{programme?.code}</b>{programme?.name}</span><code>{Number(choice.academicScore).toFixed(1)}</code></div>; })}</section>
       </div>
       <div className="review-notice"><Check size={16} /><span>This creates linked applicant, education, application, choice and status history records in one transaction.</span></div>
     </div>
