@@ -1,6 +1,6 @@
 {
   "name": "northstar-admissions",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,6 +9,12 @@
     "start": "NODE_ENV=production node server/index.js",
     "test": "vitest run",
     "benchmark": "node scripts/benchmark.mjs",
+    "db:reset": "node scripts/reset-database.mjs",
+    "model:catalogue": "node scripts/generate-model-catalogue.mjs",
+    "submission:build": "node scripts/build-submission.mjs --replace",
+    "cloud:backup": "node --env-file=.env.local scripts/backup-cloud-database.mjs",
+    "cloud:migrate": "node --env-file=.env.local scripts/migrate-cloud-database.mjs",
+    "cloud:seed": "node --env-file=.env.local scripts/sync-cloud-database.mjs",
     "cloud:sync": "node --env-file=.env.local scripts/sync-cloud-database.mjs",
     "cloud:verify": "node --env-file=.env.local scripts/verify-cloud.mjs",
     "check": "npm test && npm run build"

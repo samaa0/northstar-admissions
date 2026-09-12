@@ -9,16 +9,24 @@ const root = path.resolve(here, '..');
 const sourcePath = process.env.DATABASE_PATH || path.join(root, 'data', 'admissions.db');
 const replace = process.argv.includes('--replace');
 const tables = [
+  'schema_migrations',
   'staff_users',
   'applicants',
+  'admission_cycles',
   'programmes',
+  'programme_offerings',
+  'document_requirements',
   'scholarships',
   'applications',
   'application_choices',
   'education_records',
   'documents',
+  'interview_sessions',
+  'interview_panel_members',
   'decisions',
+  'status_transitions',
   'status_history',
+  'waitlist_entries',
   'scholarship_applications',
   'review_notes',
 ];
@@ -50,16 +58,30 @@ try {
 
   const transaction = await cloud.transaction('write');
   try {
+    const completedInterviews = [];
     if (replace) {
-      for (const table of [...tables].reverse()) {
+      // Append-only audit tables intentionally reject DELETE; a full fixture
+      // replacement temporarily removes only those guards inside this transaction.
+      await transaction.execute('DROP TRIGGER IF EXISTS status_history_no_delete');
+      await transaction.execute('DROP TRIGGER IF EXISTS decisions_no_delete');
+      for (const table of [...tables].filter((name) => name !== 'schema_migrations').reverse()) {
         await transaction.execute(`DELETE FROM "${table}"`);
       }
     }
 
     for (const table of tables) {
       const columns = local.prepare(`PRAGMA table_info("${table}")`).all().map(({ name }) => name);
-      const rows = local.prepare(`SELECT * FROM "${table}" ORDER BY id`).all();
-      const sql = `INSERT INTO "${table}" (${columns.map((column) => `"${column}"`).join(', ')}) VALUES (${columns.map(() => '?').join(', ')})`;
+      const ordering = table === 'interview_panel_members' ? 'ORDER BY interview_session_id, staff_user_id' : table === 'status_transitions' ? 'ORDER BY from_status, to_status' : 'ORDER BY id';
+      const sourceRows = local.prepare(`SELECT * FROM "${table}" ${ordering}`).all();
+      const rows = sourceRows.map((row) => {
+        if (table === 'interview_sessions' && row.status === 'COMPLETED') {
+          completedInterviews.push({ id: row.id, score: row.score, feedback: row.feedback });
+          return { ...row, status: 'SCHEDULED', score: null, feedback: null };
+        }
+        return row;
+      });
+      const command = table === 'schema_migrations' ? 'INSERT OR REPLACE' : 'INSERT';
+      const sql = `${command} INTO "${table}" (${columns.map((column) => `"${column}"`).join(', ')}) VALUES (${columns.map(() => '?').join(', ')})`;
       for (let index = 0; index < rows.length; index += 100) {
         const statements = rows.slice(index, index + 100).map((row) => ({
           sql,
@@ -67,6 +89,14 @@ try {
         }));
         if (statements.length) await transaction.batch(statements);
       }
+    }
+    // Completion requires an existing panel, so finish those sessions only
+    // after interview_panel_members has been copied above.
+    for (const interview of completedInterviews) {
+      await transaction.execute({
+        sql: 'UPDATE interview_sessions SET status = ?, score = ?, feedback = ? WHERE id = ?',
+        args: ['COMPLETED', interview.score, interview.feedback, interview.id],
+      });
     }
     await transaction.commit();
   } catch (error) {

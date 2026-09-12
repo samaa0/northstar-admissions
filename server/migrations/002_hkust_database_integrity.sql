@@ -1,0 +1,3 @@
+-- Canonical migration id: 002_hkust_database_integrity
+-- The executable DDL is maintained in ../schema.sql so SQLite, Turso, tests,
+-- the downloadable schema, and the data-model catalogue use one source.

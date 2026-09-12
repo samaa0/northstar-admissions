@@ -1,0 +1,2104 @@
+{
+  "product": "HKUST Student Admission System",
+  "generatedAt": "2026-09-12T17:44:39.104Z",
+  "summary": {
+    "businessRelations": 19,
+    "technicalTables": 1,
+    "views": 8,
+    "triggers": 21,
+    "indexes": 14,
+    "migrations": 2
+  },
+  "tables": [
+    {
+      "name": "admission_cycles",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "cycle_year",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "name",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "opens_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "closes_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "status",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "created_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": "CURRENT_TIMESTAMP",
+          "pk": 0
+        }
+      ],
+      "foreignKeys": [],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "uq_admission_cycles_single_open",
+          "unique": 1,
+          "origin": "c",
+          "partial": 1
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_admission_cycles_2",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0
+        },
+        {
+          "seq": 2,
+          "name": "sqlite_autoindex_admission_cycles_1",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0
+        }
+      ],
+      "rowCount": 2
+    },
+    {
+      "name": "applicants",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "applicant_no",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "first_name",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "last_name",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "preferred_name",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "email",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "phone",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "nationality",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "birth_date",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "created_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": "CURRENT_TIMESTAMP",
+          "pk": 0
+        }
+      ],
+      "foreignKeys": [],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_applicants_2",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_applicants_1",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0
+        }
+      ],
+      "rowCount": 48
+    },
+    {
+      "name": "application_choices",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "application_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "programme_offering_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "preference_rank",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "academic_score",
+          "type": "REAL",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "programme_offerings",
+          "from": "programme_offering_id",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "RESTRICT",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 0,
+          "table": "applications",
+          "from": "application_id",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "CASCADE",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "idx_choices_offering_rank_score",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_application_choices_2",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0
+        },
+        {
+          "seq": 2,
+          "name": "sqlite_autoindex_application_choices_1",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0
+        }
+      ],
+      "rowCount": 96
+    },
+    {
+      "name": "applications",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "application_no",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "applicant_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "cycle_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "degree_level",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "submitted_at",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "assigned_to",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "last_updated",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": "CURRENT_TIMESTAMP",
+          "pk": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "staff_users",
+          "from": "assigned_to",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "SET NULL",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 0,
+          "table": "admission_cycles",
+          "from": "cycle_id",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "RESTRICT",
+          "match": "NONE"
+        },
+        {
+          "id": 2,
+          "seq": 0,
+          "table": "applicants",
+          "from": "applicant_id",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "RESTRICT",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "idx_applications_assignee_open",
+          "unique": 0,
+          "origin": "c",
+          "partial": 1
+        },
+        {
+          "seq": 1,
+          "name": "idx_applications_cycle_dates",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0
+        },
+        {
+          "seq": 2,
+          "name": "sqlite_autoindex_applications_2",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0
+        },
+        {
+          "seq": 3,
+          "name": "sqlite_autoindex_applications_1",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0
+        }
+      ],
+      "rowCount": 48
+    },
+    {
+      "name": "decisions",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "application_choice_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "decision",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "rationale",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "decided_by",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "decided_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": "CURRENT_TIMESTAMP",
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "supersedes_decision_id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "decisions",
+          "from": "supersedes_decision_id",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "RESTRICT",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 0,
+          "table": "staff_users",
+          "from": "decided_by",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "RESTRICT",
+          "match": "NONE"
+        },
+        {
+          "id": 2,
+          "seq": 0,
+          "table": "application_choices",
+          "from": "application_choice_id",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "RESTRICT",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "idx_decisions_choice_latest",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0
+        }
+      ],
+      "rowCount": 28
+    },
+    {
+      "name": "document_requirements",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "cycle_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "degree_level",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "document_type",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "required_by_status",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "active",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": "1",
+          "pk": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "admission_cycles",
+          "from": "cycle_id",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "RESTRICT",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_document_requirements_1",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0
+        }
+      ],
+      "rowCount": 14
+    },
+    {
+      "name": "documents",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "application_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "document_type",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "file_name",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "verification_status",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": "'PENDING'",
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "uploaded_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": "CURRENT_TIMESTAMP",
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "reviewed_by",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "reviewed_at",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "staff_users",
+          "from": "reviewed_by",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "SET NULL",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 0,
+          "table": "applications",
+          "from": "application_id",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "CASCADE",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "idx_documents_compliance",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_documents_1",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0
+        }
+      ],
+      "rowCount": 154
+    },
+    {
+      "name": "education_records",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "applicant_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "institution",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "qualification",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "field_of_study",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "grade",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "graduation_year",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "applicants",
+          "from": "applicant_id",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "CASCADE",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_education_records_1",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0
+        }
+      ],
+      "rowCount": 48
+    },
+    {
+      "name": "interview_panel_members",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "interview_session_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "staff_user_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 2
+        },
+        {
+          "cid": 2,
+          "name": "panel_role",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "staff_users",
+          "from": "staff_user_id",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "RESTRICT",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 0,
+          "table": "interview_sessions",
+          "from": "interview_session_id",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "CASCADE",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "idx_panel_staff_schedule",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0
+        },
+        {
+          "seq": 1,
+          "name": "uq_interview_one_chair",
+          "unique": 1,
+          "origin": "c",
+          "partial": 1
+        },
+        {
+          "seq": 2,
+          "name": "sqlite_autoindex_interview_panel_members_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0
+        }
+      ],
+      "rowCount": 52
+    },
+    {
+      "name": "interview_sessions",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "application_choice_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "scheduled_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "duration_minutes",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "mode",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "location",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "status",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": "'SCHEDULED'",
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "score",
+          "type": "REAL",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "feedback",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "created_by",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "created_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": "CURRENT_TIMESTAMP",
+          "pk": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "staff_users",
+          "from": "created_by",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "RESTRICT",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 0,
+          "table": "application_choices",
+          "from": "application_choice_id",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "CASCADE",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "idx_interview_schedule",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0
+        }
+      ],
+      "rowCount": 30
+    },
+    {
+      "name": "programme_offerings",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "programme_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "cycle_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "capacity",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "application_deadline",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "active",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": "1",
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "created_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": "CURRENT_TIMESTAMP",
+          "pk": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "admission_cycles",
+          "from": "cycle_id",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "RESTRICT",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 0,
+          "table": "programmes",
+          "from": "programme_id",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "RESTRICT",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_programme_offerings_1",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0
+        }
+      ],
+      "rowCount": 12
+    },
+    {
+      "name": "programmes",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "code",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "name",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "school",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "degree_level",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "active",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": "1",
+          "pk": 0
+        }
+      ],
+      "foreignKeys": [],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_programmes_1",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0
+        }
+      ],
+      "rowCount": 6
+    },
+    {
+      "name": "review_notes",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "application_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "author_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "note",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "created_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": "CURRENT_TIMESTAMP",
+          "pk": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "staff_users",
+          "from": "author_id",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "RESTRICT",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 0,
+          "table": "applications",
+          "from": "application_id",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "CASCADE",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [],
+      "rowCount": 48
+    },
+    {
+      "name": "scholarship_applications",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "application_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "scholarship_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "status",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "awarded_amount_hkd",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "decided_by",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "decided_at",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "staff_users",
+          "from": "decided_by",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "RESTRICT",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 0,
+          "table": "scholarships",
+          "from": "scholarship_id",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "RESTRICT",
+          "match": "NONE"
+        },
+        {
+          "id": 2,
+          "seq": 0,
+          "table": "applications",
+          "from": "application_id",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "CASCADE",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "idx_scholarship_status",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_scholarship_applications_1",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0
+        }
+      ],
+      "rowCount": 31
+    },
+    {
+      "name": "scholarships",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "code",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "name",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "amount_hkd",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "minimum_score",
+          "type": "REAL",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "places",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "active",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": "1",
+          "pk": 0
+        }
+      ],
+      "foreignKeys": [],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_scholarships_1",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0
+        }
+      ],
+      "rowCount": 4
+    },
+    {
+      "name": "staff_users",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "name",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "email",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "role",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "active",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": "1",
+          "pk": 0
+        }
+      ],
+      "foreignKeys": [],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_staff_users_1",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0
+        }
+      ],
+      "rowCount": 5
+    },
+    {
+      "name": "status_history",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "application_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "from_status",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "to_status",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "changed_by",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "reason",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "changed_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": "CURRENT_TIMESTAMP",
+          "pk": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "staff_users",
+          "from": "changed_by",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "RESTRICT",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 0,
+          "table": "applications",
+          "from": "application_id",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "RESTRICT",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "idx_history_cycle_status_date",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0
+        },
+        {
+          "seq": 1,
+          "name": "idx_history_chronology",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0
+        }
+      ],
+      "rowCount": 188
+    },
+    {
+      "name": "status_transitions",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "from_status",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "to_status",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 2
+        },
+        {
+          "cid": 2,
+          "name": "requires_reason",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": "0",
+          "pk": 0
+        }
+      ],
+      "foreignKeys": [],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_status_transitions_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0
+        }
+      ],
+      "rowCount": 22
+    },
+    {
+      "name": "waitlist_entries",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "id",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "application_choice_id",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "status",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": "'ACTIVE'",
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "joined_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": "CURRENT_TIMESTAMP",
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "reason",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "handled_by",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "handled_at",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreignKeys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "staff_users",
+          "from": "handled_by",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "RESTRICT",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 0,
+          "table": "application_choices",
+          "from": "application_choice_id",
+          "to": "id",
+          "on_update": "NO ACTION",
+          "on_delete": "RESTRICT",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "idx_waitlist_status_joined",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0
+        },
+        {
+          "seq": 1,
+          "name": "uq_waitlist_active_choice",
+          "unique": 1,
+          "origin": "c",
+          "partial": 1
+        }
+      ],
+      "rowCount": 10
+    }
+  ],
+  "views": [
+    {
+      "name": "v_application_current_status",
+      "type": "view",
+      "sql": "CREATE VIEW v_application_current_status AS\nSELECT application_id, to_status AS current_status, changed_at AS status_changed_at\nFROM (\n  SELECT sh.*,\n         ROW_NUMBER() OVER (PARTITION BY application_id ORDER BY datetime(changed_at) DESC, id DESC) AS row_num\n  FROM status_history sh\n)\nWHERE row_num = 1"
+    },
+    {
+      "name": "v_application_register",
+      "type": "view",
+      "sql": "CREATE VIEW v_application_register AS\nSELECT\n  a.id,\n  a.application_no,\n  a.applicant_id,\n  ap.applicant_no,\n  ap.first_name,\n  ap.last_name,\n  ap.email,\n  ap.nationality,\n  a.cycle_id,\n  c.cycle_year,\n  c.name AS cycle_name,\n  a.degree_level,\n  a.submitted_at,\n  a.assigned_to,\n  su.name AS assigned_name,\n  COALESCE(cs.current_status, 'DRAFT') AS status,\n  COALESCE(r.risk_flag, 'NONE') AS risk_flag,\n  a.last_updated\nFROM applications a\nJOIN applicants ap ON ap.id = a.applicant_id\nJOIN admission_cycles c ON c.id = a.cycle_id\nLEFT JOIN staff_users su ON su.id = a.assigned_to\nLEFT JOIN v_application_current_status cs ON cs.application_id = a.id\nLEFT JOIN v_application_risks r ON r.application_id = a.id"
+    },
+    {
+      "name": "v_application_risks",
+      "type": "view",
+      "sql": "CREATE VIEW v_application_risks AS\nSELECT\n  a.id AS application_id,\n  CASE\n    WHEN COALESCE(dc.missing_count, 0) > 0 OR COALESCE(dc.pending_count, 0) > 0 OR COALESCE(dc.rejected_count, 0) > 0 THEN 'MISSING_DOCS'\n    WHEN EXISTS (\n      SELECT 1 FROM application_choices ac\n      JOIN programme_offerings po ON po.id = ac.programme_offering_id\n      WHERE ac.application_id = a.id\n        AND a.submitted_at IS NOT NULL\n        AND datetime(a.submitted_at) > datetime(po.application_deadline)\n    ) THEN 'DEADLINE'\n    ELSE 'NONE'\n  END AS risk_flag\nFROM applications a\nLEFT JOIN v_document_compliance dc ON dc.application_id = a.id"
+    },
+    {
+      "name": "v_current_decisions",
+      "type": "view",
+      "sql": "CREATE VIEW v_current_decisions AS\nSELECT id, application_choice_id, decision, rationale, decided_by, decided_at, supersedes_decision_id\nFROM (\n  SELECT d.*,\n         ROW_NUMBER() OVER (PARTITION BY application_choice_id ORDER BY datetime(decided_at) DESC, id DESC) AS row_num\n  FROM decisions d\n)\nWHERE row_num = 1"
+    },
+    {
+      "name": "v_document_compliance",
+      "type": "view",
+      "sql": "CREATE VIEW v_document_compliance AS\nSELECT\n  a.id AS application_id,\n  COUNT(dr.id) AS required_count,\n  SUM(CASE WHEN d.verification_status = 'VERIFIED' THEN 1 ELSE 0 END) AS verified_count,\n  SUM(CASE WHEN d.id IS NULL THEN 1 ELSE 0 END) AS missing_count,\n  SUM(CASE WHEN d.verification_status = 'PENDING' THEN 1 ELSE 0 END) AS pending_count,\n  SUM(CASE WHEN d.verification_status = 'REJECTED' THEN 1 ELSE 0 END) AS rejected_count,\n  CASE\n    WHEN COUNT(dr.id) > 0\n     AND COUNT(dr.id) = SUM(CASE WHEN d.verification_status = 'VERIFIED' THEN 1 ELSE 0 END)\n    THEN 1 ELSE 0\n  END AS compliant\nFROM applications a\nJOIN document_requirements dr\n  ON dr.cycle_id = a.cycle_id\n AND dr.degree_level = a.degree_level\n AND dr.active = 1\nLEFT JOIN documents d\n  ON d.application_id = a.id\n AND d.document_type = dr.document_type\nGROUP BY a.id"
+    },
+    {
+      "name": "v_programme_capacity",
+      "type": "view",
+      "sql": "CREATE VIEW v_programme_capacity AS\nSELECT\n  po.id AS programme_offering_id,\n  po.cycle_id,\n  p.id AS programme_id,\n  p.code,\n  p.name,\n  p.school,\n  p.degree_level,\n  po.capacity,\n  SUM(CASE WHEN ac.preference_rank = 1 THEN 1 ELSE 0 END) AS first_choice_demand,\n  SUM(CASE WHEN ac.preference_rank = 1 AND cs.current_status = 'ACCEPTED' THEN 1 ELSE 0 END) AS accepted_count,\n  po.capacity - SUM(CASE WHEN ac.preference_rank = 1 AND cs.current_status = 'ACCEPTED' THEN 1 ELSE 0 END) AS remaining_places,\n  po.application_deadline,\n  po.active\nFROM programme_offerings po\nJOIN programmes p ON p.id = po.programme_id\nLEFT JOIN application_choices ac ON ac.programme_offering_id = po.id\nLEFT JOIN v_application_current_status cs ON cs.application_id = ac.application_id\nGROUP BY po.id"
+    },
+    {
+      "name": "v_reviewer_workload",
+      "type": "view",
+      "sql": "CREATE VIEW v_reviewer_workload AS\nSELECT\n  su.id AS staff_user_id,\n  su.name,\n  su.role,\n  a.cycle_id,\n  SUM(CASE WHEN cs.current_status IS NOT NULL THEN 1 ELSE 0 END) AS open_cases\nFROM staff_users su\nLEFT JOIN applications a ON a.assigned_to = su.id\nLEFT JOIN v_application_current_status cs ON cs.application_id = a.id\n  AND cs.current_status NOT IN ('ACCEPTED', 'DECLINED', 'WITHDRAWN')\nWHERE su.active = 1 AND su.role IN ('ADMISSIONS', 'REVIEWER')\nGROUP BY su.id, a.cycle_id"
+    },
+    {
+      "name": "v_waitlist_ranking",
+      "type": "view",
+      "sql": "CREATE VIEW v_waitlist_ranking AS\nWITH latest_interviews AS (\n  SELECT application_choice_id, score\n  FROM (\n    SELECT\n      application_choice_id,\n      score,\n      ROW_NUMBER() OVER (PARTITION BY application_choice_id ORDER BY datetime(scheduled_at) DESC, id DESC) AS row_num\n    FROM interview_sessions\n    WHERE status = 'COMPLETED'\n  )\n  WHERE row_num = 1\n), active_waitlist AS (\n  SELECT\n    we.id AS waitlist_entry_id,\n    we.application_choice_id,\n    we.joined_at,\n    ac.programme_offering_id,\n    ac.application_id,\n    ac.academic_score,\n    COALESCE(li.score, ac.academic_score) AS interview_score,\n    ROUND((ac.academic_score * 0.7) + (COALESCE(li.score, ac.academic_score) * 0.3), 2) AS ranking_score\n  FROM waitlist_entries we\n  JOIN application_choices ac ON ac.id = we.application_choice_id\n  LEFT JOIN latest_interviews li ON li.application_choice_id = ac.id\n  WHERE we.status = 'ACTIVE'\n)\nSELECT\n  *,\n  ROW_NUMBER() OVER (\n    PARTITION BY programme_offering_id\n    ORDER BY ranking_score DESC, datetime(joined_at), waitlist_entry_id\n  ) AS waitlist_rank\nFROM active_waitlist"
+    }
+  ],
+  "triggers": [
+    {
+      "name": "applicants_validate_age_insert",
+      "type": "trigger",
+      "sql": "CREATE TRIGGER applicants_validate_age_insert\nBEFORE INSERT ON applicants\nBEGIN\n  SELECT CASE\n    WHEN date(NEW.birth_date) > date('now', '-16 years')\n      OR date(NEW.birth_date) < date('now', '-81 years', '+1 day')\n    THEN RAISE(ABORT, 'Applicant must be between 16 and 80 years old')\n  END;\nEND"
+    },
+    {
+      "name": "applicants_validate_age_update",
+      "type": "trigger",
+      "sql": "CREATE TRIGGER applicants_validate_age_update\nBEFORE UPDATE OF birth_date ON applicants\nBEGIN\n  SELECT CASE\n    WHEN date(NEW.birth_date) > date('now', '-16 years')\n      OR date(NEW.birth_date) < date('now', '-81 years', '+1 day')\n    THEN RAISE(ABORT, 'Applicant must be between 16 and 80 years old')\n  END;\nEND"
+    },
+    {
+      "name": "applications_validate_assignment_insert",
+      "type": "trigger",
+      "sql": "CREATE TRIGGER applications_validate_assignment_insert\nBEFORE INSERT ON applications WHEN NEW.assigned_to IS NOT NULL\nBEGIN\n  SELECT CASE WHEN NOT EXISTS (\n    SELECT 1 FROM staff_users\n    WHERE id = NEW.assigned_to AND active = 1 AND role IN ('ADMISSIONS', 'REVIEWER')\n  ) THEN RAISE(ABORT, 'Application assignee must be active admissions or reviewer staff') END;\nEND"
+    },
+    {
+      "name": "applications_validate_assignment_update",
+      "type": "trigger",
+      "sql": "CREATE TRIGGER applications_validate_assignment_update\nBEFORE UPDATE OF assigned_to ON applications WHEN NEW.assigned_to IS NOT NULL\nBEGIN\n  SELECT CASE WHEN NOT EXISTS (\n    SELECT 1 FROM staff_users\n    WHERE id = NEW.assigned_to AND active = 1 AND role IN ('ADMISSIONS', 'REVIEWER')\n  ) THEN RAISE(ABORT, 'Application assignee must be active admissions or reviewer staff') END;\nEND"
+    },
+    {
+      "name": "choices_validate_delete",
+      "type": "trigger",
+      "sql": "CREATE TRIGGER choices_validate_delete\nBEFORE DELETE ON application_choices\nWHEN EXISTS (\n  SELECT 1 FROM application_choices\n  WHERE application_id = OLD.application_id AND preference_rank > OLD.preference_rank\n)\nBEGIN\n  SELECT RAISE(ABORT, 'Cannot create a gap in preference ranks');\nEND"
+    },
+    {
+      "name": "choices_validate_insert",
+      "type": "trigger",
+      "sql": "CREATE TRIGGER choices_validate_insert\nBEFORE INSERT ON application_choices\nBEGIN\n  SELECT CASE WHEN NOT EXISTS (\n    SELECT 1\n    FROM applications a\n    JOIN programme_offerings po ON po.id = NEW.programme_offering_id\n    JOIN programmes p ON p.id = po.programme_id\n    WHERE a.id = NEW.application_id\n      AND a.cycle_id = po.cycle_id\n      AND a.degree_level = p.degree_level\n      AND po.active = 1\n      AND p.active = 1\n  ) THEN RAISE(ABORT, 'Choice offering must match application cycle and degree level') END;\n  SELECT CASE WHEN NEW.preference_rank <> (\n    SELECT COUNT(*) + 1 FROM application_choices WHERE application_id = NEW.application_id\n  ) THEN RAISE(ABORT, 'Preference ranks must be contiguous') END;\nEND"
+    },
+    {
+      "name": "choices_validate_update",
+      "type": "trigger",
+      "sql": "CREATE TRIGGER choices_validate_update\nBEFORE UPDATE OF application_id, programme_offering_id, preference_rank ON application_choices\nBEGIN\n  SELECT RAISE(ABORT, 'Application choice identity and rank are immutable');\nEND"
+    },
+    {
+      "name": "decisions_no_delete",
+      "type": "trigger",
+      "sql": "CREATE TRIGGER decisions_no_delete\nBEFORE DELETE ON decisions\nBEGIN\n  SELECT RAISE(ABORT, 'Decision history is append-only');\nEND"
+    },
+    {
+      "name": "decisions_no_update",
+      "type": "trigger",
+      "sql": "CREATE TRIGGER decisions_no_update\nBEFORE UPDATE ON decisions\nBEGIN\n  SELECT RAISE(ABORT, 'Decision history is append-only');\nEND"
+    },
+    {
+      "name": "documents_validate_reviewer_insert",
+      "type": "trigger",
+      "sql": "CREATE TRIGGER documents_validate_reviewer_insert\nBEFORE INSERT ON documents WHEN NEW.reviewed_by IS NOT NULL\nBEGIN\n  SELECT CASE WHEN NOT EXISTS (\n    SELECT 1 FROM staff_users WHERE id = NEW.reviewed_by AND active = 1\n  ) THEN RAISE(ABORT, 'Document reviewer must be active staff') END;\nEND"
+    },
+    {
+      "name": "documents_validate_reviewer_update",
+      "type": "trigger",
+      "sql": "CREATE TRIGGER documents_validate_reviewer_update\nBEFORE UPDATE OF verification_status, reviewed_by, reviewed_at ON documents WHEN NEW.reviewed_by IS NOT NULL\nBEGIN\n  SELECT CASE WHEN NOT EXISTS (\n    SELECT 1 FROM staff_users WHERE id = NEW.reviewed_by AND active = 1\n  ) THEN RAISE(ABORT, 'Document reviewer must be active staff') END;\nEND"
+    },
+    {
+      "name": "interview_completion_guard_insert",
+      "type": "trigger",
+      "sql": "CREATE TRIGGER interview_completion_guard_insert\nBEFORE INSERT ON interview_sessions WHEN NEW.status = 'COMPLETED'\nBEGIN\n  SELECT RAISE(ABORT, 'Create the interview and assign a panel before completion');\nEND"
+    },
+    {
+      "name": "interview_completion_guard_update",
+      "type": "trigger",
+      "sql": "CREATE TRIGGER interview_completion_guard_update\nBEFORE UPDATE OF status, score, feedback ON interview_sessions WHEN NEW.status = 'COMPLETED'\nBEGIN\n  SELECT CASE WHEN NEW.score IS NULL OR NEW.feedback IS NULL OR length(trim(NEW.feedback)) < 5\n    THEN RAISE(ABORT, 'Completed interview requires score and feedback') END;\n  SELECT CASE WHEN NOT EXISTS (\n    SELECT 1 FROM interview_panel_members WHERE interview_session_id = OLD.id\n  ) THEN RAISE(ABORT, 'Completed interview requires at least one panel member') END;\nEND"
+    },
+    {
+      "name": "interview_panel_overlap_insert",
+      "type": "trigger",
+      "sql": "CREATE TRIGGER interview_panel_overlap_insert\nBEFORE INSERT ON interview_panel_members\nBEGIN\n  SELECT CASE WHEN EXISTS (\n    SELECT 1\n    FROM interview_panel_members existing\n    JOIN interview_sessions old_session ON old_session.id = existing.interview_session_id\n    JOIN interview_sessions new_session ON new_session.id = NEW.interview_session_id\n    WHERE existing.staff_user_id = NEW.staff_user_id\n      AND old_session.status = 'SCHEDULED'\n      AND new_session.status = 'SCHEDULED'\n      AND datetime(old_session.scheduled_at) < datetime(new_session.scheduled_at, '+' || new_session.duration_minutes || ' minutes')\n      AND datetime(new_session.scheduled_at) < datetime(old_session.scheduled_at, '+' || old_session.duration_minutes || ' minutes')\n  ) THEN RAISE(ABORT, 'Panel member has an overlapping interview') END;\nEND"
+    },
+    {
+      "name": "interview_schedule_overlap_update",
+      "type": "trigger",
+      "sql": "CREATE TRIGGER interview_schedule_overlap_update\nBEFORE UPDATE OF scheduled_at, duration_minutes, status ON interview_sessions\nWHEN NEW.status = 'SCHEDULED'\nBEGIN\n  SELECT CASE WHEN EXISTS (\n    SELECT 1\n    FROM interview_panel_members current_panel\n    JOIN interview_panel_members other_panel ON other_panel.staff_user_id = current_panel.staff_user_id\n    JOIN interview_sessions other_session ON other_session.id = other_panel.interview_session_id\n    WHERE current_panel.interview_session_id = OLD.id\n      AND other_session.id <> OLD.id\n      AND other_session.status = 'SCHEDULED'\n      AND datetime(other_session.scheduled_at) < datetime(NEW.scheduled_at, '+' || NEW.duration_minutes || ' minutes')\n      AND datetime(NEW.scheduled_at) < datetime(other_session.scheduled_at, '+' || other_session.duration_minutes || ' minutes')\n  ) THEN RAISE(ABORT, 'Panel member has an overlapping interview') END;\nEND"
+    },
+    {
+      "name": "offerings_capacity_guard",
+      "type": "trigger",
+      "sql": "CREATE TRIGGER offerings_capacity_guard\nBEFORE UPDATE OF capacity ON programme_offerings\nBEGIN\n  SELECT CASE WHEN NEW.capacity < (\n    SELECT accepted_count FROM v_programme_capacity WHERE programme_offering_id = OLD.id\n  ) THEN RAISE(ABORT, 'Capacity cannot be lower than accepted enrolments') END;\nEND"
+    },
+    {
+      "name": "scholarship_award_guard_insert",
+      "type": "trigger",
+      "sql": "CREATE TRIGGER scholarship_award_guard_insert\nBEFORE INSERT ON scholarship_applications WHEN NEW.status = 'AWARDED'\nBEGIN\n  SELECT CASE WHEN NOT EXISTS (\n    SELECT 1 FROM scholarships s\n    WHERE s.id = NEW.scholarship_id\n      AND s.active = 1\n      AND NEW.awarded_amount_hkd <= s.amount_hkd\n      AND s.minimum_score <= (\n        SELECT MAX(academic_score) FROM application_choices WHERE application_id = NEW.application_id\n      )\n      AND s.places > (\n        SELECT COUNT(*) FROM scholarship_applications sa\n        WHERE sa.scholarship_id = NEW.scholarship_id AND sa.status = 'AWARDED'\n      )\n  ) THEN RAISE(ABORT, 'Scholarship award violates active, amount, score, or places rule') END;\nEND"
+    },
+    {
+      "name": "scholarship_award_guard_update",
+      "type": "trigger",
+      "sql": "CREATE TRIGGER scholarship_award_guard_update\nBEFORE UPDATE OF scholarship_id, status, awarded_amount_hkd ON scholarship_applications\nWHEN NEW.status = 'AWARDED' AND OLD.status <> 'AWARDED'\nBEGIN\n  SELECT CASE WHEN NOT EXISTS (\n    SELECT 1 FROM scholarships s\n    WHERE s.id = NEW.scholarship_id\n      AND s.active = 1\n      AND NEW.awarded_amount_hkd <= s.amount_hkd\n      AND s.minimum_score <= (\n        SELECT MAX(academic_score) FROM application_choices WHERE application_id = NEW.application_id\n      )\n      AND s.places > (\n        SELECT COUNT(*) FROM scholarship_applications sa\n        WHERE sa.scholarship_id = NEW.scholarship_id AND sa.status = 'AWARDED'\n      )\n  ) THEN RAISE(ABORT, 'Scholarship award violates active, amount, score, or places rule') END;\nEND"
+    },
+    {
+      "name": "status_history_no_delete",
+      "type": "trigger",
+      "sql": "CREATE TRIGGER status_history_no_delete\nBEFORE DELETE ON status_history\nBEGIN\n  SELECT RAISE(ABORT, 'Status history is append-only');\nEND"
+    },
+    {
+      "name": "status_history_no_update",
+      "type": "trigger",
+      "sql": "CREATE TRIGGER status_history_no_update\nBEFORE UPDATE ON status_history\nBEGIN\n  SELECT RAISE(ABORT, 'Status history is append-only');\nEND"
+    },
+    {
+      "name": "status_history_validate_insert",
+      "type": "trigger",
+      "sql": "CREATE TRIGGER status_history_validate_insert\nBEFORE INSERT ON status_history\nBEGIN\n  SELECT CASE\n    WHEN NOT EXISTS (SELECT 1 FROM status_history WHERE application_id = NEW.application_id)\n      AND (NEW.from_status IS NOT NULL OR NEW.to_status NOT IN ('DRAFT', 'SUBMITTED'))\n    THEN RAISE(ABORT, 'Initial status must be DRAFT or SUBMITTED with no from_status')\n  END;\n  SELECT CASE\n    WHEN EXISTS (SELECT 1 FROM status_history WHERE application_id = NEW.application_id)\n      AND NEW.from_status IS NOT (\n        SELECT to_status FROM status_history\n        WHERE application_id = NEW.application_id\n        ORDER BY datetime(changed_at) DESC, id DESC LIMIT 1\n      )\n    THEN RAISE(ABORT, 'from_status does not match current application status')\n  END;\n  SELECT CASE\n    WHEN EXISTS (SELECT 1 FROM status_history WHERE application_id = NEW.application_id)\n      AND NOT EXISTS (\n        SELECT 1 FROM status_transitions\n        WHERE from_status = NEW.from_status AND to_status = NEW.to_status\n      )\n    THEN RAISE(ABORT, 'Illegal application status transition')\n  END;\n  SELECT CASE\n    WHEN EXISTS (\n      SELECT 1 FROM status_transitions\n      WHERE from_status = NEW.from_status\n        AND to_status = NEW.to_status\n        AND requires_reason = 1\n    ) AND (NEW.reason IS NULL OR length(trim(NEW.reason)) < 3)\n    THEN RAISE(ABORT, 'A reason is required for this status transition')\n  END;\n  SELECT CASE\n    WHEN NEW.to_status IN ('OFFERED', 'ACCEPTED')\n      AND NOT EXISTS (\n        SELECT 1 FROM v_document_compliance\n        WHERE application_id = NEW.application_id AND compliant = 1\n      )\n    THEN RAISE(ABORT, 'All required documents must be verified before offer or acceptance')\n  END;\n  SELECT CASE\n    WHEN NEW.to_status = 'ACCEPTED' AND (\n      SELECT remaining_places FROM v_programme_capacity\n      WHERE programme_offering_id = (\n        SELECT programme_offering_id FROM application_choices\n        WHERE application_id = NEW.application_id AND preference_rank = 1\n      )\n    ) <= 0\n    THEN RAISE(ABORT, 'Programme offering capacity has been reached')\n  END;\nEND"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx_applications_assignee_open",
+      "type": "index",
+      "sql": "CREATE INDEX idx_applications_assignee_open\n  ON applications(assigned_to, cycle_id) WHERE assigned_to IS NOT NULL"
+    },
+    {
+      "name": "idx_applications_cycle_dates",
+      "type": "index",
+      "sql": "CREATE INDEX idx_applications_cycle_dates\n  ON applications(cycle_id, submitted_at, id)"
+    },
+    {
+      "name": "idx_choices_offering_rank_score",
+      "type": "index",
+      "sql": "CREATE INDEX idx_choices_offering_rank_score\n  ON application_choices(programme_offering_id, preference_rank, academic_score DESC)"
+    },
+    {
+      "name": "idx_decisions_choice_latest",
+      "type": "index",
+      "sql": "CREATE INDEX idx_decisions_choice_latest\n  ON decisions(application_choice_id, datetime(decided_at) DESC, id DESC)"
+    },
+    {
+      "name": "idx_documents_compliance",
+      "type": "index",
+      "sql": "CREATE INDEX idx_documents_compliance\n  ON documents(application_id, document_type, verification_status)"
+    },
+    {
+      "name": "idx_history_chronology",
+      "type": "index",
+      "sql": "CREATE INDEX idx_history_chronology\n  ON status_history(application_id, datetime(changed_at) DESC, id DESC)"
+    },
+    {
+      "name": "idx_history_cycle_status_date",
+      "type": "index",
+      "sql": "CREATE INDEX idx_history_cycle_status_date\n  ON status_history(to_status, changed_at, application_id)"
+    },
+    {
+      "name": "idx_interview_schedule",
+      "type": "index",
+      "sql": "CREATE INDEX idx_interview_schedule\n  ON interview_sessions(scheduled_at, status, application_choice_id)"
+    },
+    {
+      "name": "idx_panel_staff_schedule",
+      "type": "index",
+      "sql": "CREATE INDEX idx_panel_staff_schedule\n  ON interview_panel_members(staff_user_id, interview_session_id)"
+    },
+    {
+      "name": "idx_scholarship_status",
+      "type": "index",
+      "sql": "CREATE INDEX idx_scholarship_status\n  ON scholarship_applications(scholarship_id, status, application_id)"
+    },
+    {
+      "name": "idx_waitlist_status_joined",
+      "type": "index",
+      "sql": "CREATE INDEX idx_waitlist_status_joined\n  ON waitlist_entries(status, joined_at, application_choice_id)"
+    },
+    {
+      "name": "uq_admission_cycles_single_open",
+      "type": "index",
+      "sql": "CREATE UNIQUE INDEX uq_admission_cycles_single_open\n  ON admission_cycles(status) WHERE status = 'OPEN'"
+    },
+    {
+      "name": "uq_interview_one_chair",
+      "type": "index",
+      "sql": "CREATE UNIQUE INDEX uq_interview_one_chair\n  ON interview_panel_members(interview_session_id) WHERE panel_role = 'CHAIR'"
+    },
+    {
+      "name": "uq_waitlist_active_choice",
+      "type": "index",
+      "sql": "CREATE UNIQUE INDEX uq_waitlist_active_choice\n  ON waitlist_entries(application_choice_id) WHERE status = 'ACTIVE'"
+    }
+  ],
+  "migrations": [
+    {
+      "id": "002_hkust_database_integrity",
+      "checksum": "ee82b87d7d7e60cfc943c766a5c4375d5c7c02d203d7562439fe9f80712f1868",
+      "applied_at": "2026-09-12 15:46:40"
+    },
+    {
+      "id": "seed",
+      "checksum": "2026-09-12-v2",
+      "applied_at": "2026-09-12 15:46:40"
+    }
+  ],
+  "relationships": [
+    {
+      "fromTable": "application_choices",
+      "fromColumn": "programme_offering_id",
+      "toTable": "programme_offerings",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "application_choices",
+      "fromColumn": "application_id",
+      "toTable": "applications",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "applications",
+      "fromColumn": "assigned_to",
+      "toTable": "staff_users",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "applications",
+      "fromColumn": "cycle_id",
+      "toTable": "admission_cycles",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "applications",
+      "fromColumn": "applicant_id",
+      "toTable": "applicants",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "decisions",
+      "fromColumn": "supersedes_decision_id",
+      "toTable": "decisions",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "decisions",
+      "fromColumn": "decided_by",
+      "toTable": "staff_users",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "decisions",
+      "fromColumn": "application_choice_id",
+      "toTable": "application_choices",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "document_requirements",
+      "fromColumn": "cycle_id",
+      "toTable": "admission_cycles",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "documents",
+      "fromColumn": "reviewed_by",
+      "toTable": "staff_users",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "documents",
+      "fromColumn": "application_id",
+      "toTable": "applications",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "education_records",
+      "fromColumn": "applicant_id",
+      "toTable": "applicants",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "interview_panel_members",
+      "fromColumn": "staff_user_id",
+      "toTable": "staff_users",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "interview_panel_members",
+      "fromColumn": "interview_session_id",
+      "toTable": "interview_sessions",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "interview_sessions",
+      "fromColumn": "created_by",
+      "toTable": "staff_users",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "interview_sessions",
+      "fromColumn": "application_choice_id",
+      "toTable": "application_choices",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "programme_offerings",
+      "fromColumn": "cycle_id",
+      "toTable": "admission_cycles",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "programme_offerings",
+      "fromColumn": "programme_id",
+      "toTable": "programmes",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "review_notes",
+      "fromColumn": "author_id",
+      "toTable": "staff_users",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "review_notes",
+      "fromColumn": "application_id",
+      "toTable": "applications",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "scholarship_applications",
+      "fromColumn": "decided_by",
+      "toTable": "staff_users",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "scholarship_applications",
+      "fromColumn": "scholarship_id",
+      "toTable": "scholarships",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "scholarship_applications",
+      "fromColumn": "application_id",
+      "toTable": "applications",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "status_history",
+      "fromColumn": "changed_by",
+      "toTable": "staff_users",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "status_history",
+      "fromColumn": "application_id",
+      "toTable": "applications",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "waitlist_entries",
+      "fromColumn": "handled_by",
+      "toTable": "staff_users",
+      "toColumn": "id"
+    },
+    {
+      "fromTable": "waitlist_entries",
+      "fromColumn": "application_choice_id",
+      "toTable": "application_choices",
+      "toColumn": "id"
+    }
+  ],
+  "businessRules": [
+    "Application status and decisions are append-only histories.",
+    "Only legal status transitions may be inserted, and selected transitions require a reason.",
+    "Required evidence must be verified before an offer or acceptance.",
+    "Accepted applications and scholarship awards cannot exceed annual capacity.",
+    "Application choices must share cycle and degree level with contiguous preference ranks.",
+    "Completed interviews require a panel, score and feedback; panel schedules cannot overlap."
+  ]
+}
