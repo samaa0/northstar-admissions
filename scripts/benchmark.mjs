@@ -89,8 +89,8 @@ try {
 
   const reportChecks = [];
   for (const report of reports) {
-    const response = await request(app).get(`/api/reports/${report.id}`);
-    const directRows = db.prepare(report.sql).all();
+    const response = await request(app).get(`/api/reports/${report.id}`).query({ cycleId: 2 });
+    const directRows = db.prepare(report.sql).all({ cycleId: 2, from: null, to: null });
     reportChecks.push({
       id: report.id,
       status: response.status,
@@ -143,9 +143,11 @@ try {
     fieldOfStudy: 'Information Systems',
     grade: 'A',
     graduationYear: 2026,
+    cycleId: 2,
+    degreeLevel: 'UG',
     choices: [
-      { programmeId: 1, academicScore: 95 },
-      { programmeId: 2, academicScore: 92 },
+      { offeringId: 7, academicScore: 95 },
+      { offeringId: 8, academicScore: 92 },
     ],
   });
   const afterValid = tableCounts();
@@ -183,7 +185,7 @@ try {
   };
 
   const result = {
-    benchmark: 'Northstar Admissions isolated stability benchmark',
+    benchmark: 'HKUST Student Admission System isolated stability benchmark',
     timestamp: new Date().toISOString(),
     environment: {
       node: process.version,

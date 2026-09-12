@@ -41,12 +41,11 @@ describe('registry design tokens', () => {
     expect(theme).toContain('.compact-registry-mark');
   });
 
-  it('preserves the registry mark as a self-contained vector asset', () => {
-    const webMark = readFileSync(new URL('../public/registry-mark.svg', import.meta.url), 'utf8');
+  it('preserves the official HKUST logo as a self-contained vector asset', () => {
+    const webMark = readFileSync(new URL('../public/hkust-logo-color.svg', import.meta.url), 'utf8');
     const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-    expect(html).toContain('href="/registry-mark.svg"');
-    expect(webMark).toContain('viewBox="0 0 32 32"');
-    expect(webMark).toContain('fill="#003366"');
+    expect(html).toContain('HKUST Student Admission System');
+    expect(webMark).toContain('viewBox=');
     expect(webMark).not.toMatch(/<(?:script|foreignObject|image)\b|\bon\w+=|(?:href|xlink:href)\s*=/i);
   });
 

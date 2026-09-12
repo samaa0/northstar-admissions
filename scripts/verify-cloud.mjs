@@ -7,6 +7,7 @@ import { reports } from '../server/reports.js';
 const db = createCloudDatabase();
 const app = createApp(db);
 let originalCapacity;
+let offeringId;
 
 try {
   const health = await request(app).get('/api/health').expect(200);
@@ -16,21 +17,23 @@ try {
   assert.equal(dashboard.body.metrics.total, 24);
 
   const model = await request(app).get('/api/model').expect(200);
-  assert.equal(model.body.tables.length, 12);
+  assert.equal(model.body.tables.length, 19);
+  assert.equal(model.body.reports.length, 15);
 
   for (const report of reports) {
     const result = await request(app).get(`/api/reports/${report.id}`).expect(200);
     assert.ok(Array.isArray(result.body.rows));
   }
 
-  const programmes = await request(app).get('/api/admin/programmes').expect(200);
-  const programme = programmes.body.find(({ id }) => id === 1);
-  assert.ok(programme);
-  originalCapacity = programme.capacity;
-  await request(app).patch('/api/admin/programmes/1').send({ capacity: originalCapacity + 1 }).expect(200);
-  const updated = await request(app).get('/api/admin/programmes').expect(200);
-  assert.equal(updated.body.find(({ id }) => id === 1).capacity, originalCapacity + 1);
-  await request(app).patch('/api/admin/programmes/1').send({ capacity: originalCapacity }).expect(200);
+  const offerings = await request(app).get('/api/admin/offerings?cycleId=2').expect(200);
+  const offering = offerings.body[0];
+  assert.ok(offering);
+  offeringId = offering.id;
+  originalCapacity = offering.capacity;
+  await request(app).patch(`/api/admin/offerings/${offeringId}`).send({ capacity: originalCapacity + 1 }).expect(200);
+  const updated = await request(app).get('/api/admin/offerings?cycleId=2').expect(200);
+  assert.equal(updated.body.find(({ id }) => id === offeringId).capacity, originalCapacity + 1);
+  await request(app).patch(`/api/admin/offerings/${offeringId}`).send({ capacity: originalCapacity }).expect(200);
   originalCapacity = undefined;
 
   await db.prepare('CREATE TABLE IF NOT EXISTS deployment_probe (id INTEGER PRIMARY KEY, value TEXT NOT NULL)').run();
@@ -46,10 +49,10 @@ try {
   assert.equal((await db.prepare('SELECT COUNT(*) AS count FROM deployment_probe').get()).count, 1);
   await db.prepare('DROP TABLE deployment_probe').run();
 
-  console.log(`Cloud verification passed: 12 tables, ${reports.length} reports, read/write, commit, and rollback`);
+  console.log(`Cloud verification passed: 19 relations, ${reports.length} reports, read/write, commit, and rollback`);
 } finally {
   if (originalCapacity !== undefined) {
-    await request(app).patch('/api/admin/programmes/1').send({ capacity: originalCapacity });
+    await request(app).patch(`/api/admin/offerings/${offeringId}`).send({ capacity: originalCapacity });
   }
   try {
     await db.prepare('DROP TABLE IF EXISTS deployment_probe').run();

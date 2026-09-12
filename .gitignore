@@ -4,6 +4,7 @@ tmp/
 .DS_Store
 data/*.db-shm
 data/*.db-wal
+data/*.db.legacy-*
 *.log
 .vercel
 .env*
@@ -13,5 +14,7 @@ skills-lock.json
 docs/__pycache__/
 docs/~$*.docx
 docs/
+submission/
+ISOM5260_Submission*.zip
 src/lib/*.icloud-placeholder
 *.pdf

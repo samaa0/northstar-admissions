@@ -1,6 +1,6 @@
-# Northstar Student Admission System
+# HKUST Student Admission System
 
-Northstar is a complete admissions decision desk with a responsive React interface, a validated Express API, and a normalized 12-table relational database. The local application uses SQLite, while the production deployment uses the equivalent persistent Turso/libSQL database. The system includes applicant intake, ranked programme choices, review workflows, audit history, document tracking, scholarships, and 12 live managerial reports.
+HKUST Student Admission System is a complete admissions decision desk with a responsive React interface, a validated Express API, and a normalized 19-relation relational database. The local application uses SQLite, while the production deployment uses the equivalent persistent Turso/libSQL database. The system includes admission cycles, annual programme offerings, ranked choices, requirement-driven evidence, review workflows, append-only audit history, interviews, panels, waitlists, scholarships, and 15 live managerial reports.
 
 Live system: https://northstar-admissions-bay.vercel.app
 
@@ -21,11 +21,11 @@ Open `http://127.0.0.1:5173`. The API runs on `http://127.0.0.1:3001` and the pe
 
 ## Assessment highlights
 
-- Twelve related entities with primary keys, foreign keys, constraints, indexes, and a documented 3NF design.
+- Nineteen business relations plus a technical `schema_migrations` table, with primary keys, foreign keys, CHECK/UNIQUE constraints, views, triggers, indexes and a documented 3NF design.
 - Transactional applicant intake with field, age, email, academic-score, and ranked-choice validation.
 - Controlled status transitions with mandatory reasons for adverse decisions and append-only audit history.
 - Searchable applicant register, linked record inspection, review notes, evidence status, and exception flags.
-- Twelve whitelisted SQL reports covering demand, conversion, capacity, document completion, risk, scholarships, and reviewer workload.
+- Fifteen whitelisted SQL reports covering demand, conversion, capacity, document compliance, risk, scholarships, reviewer workload, interviews, waitlists and cross-cycle comparison.
 - In-app conceptual model, logical schema, business rules, data dictionary, SQL catalogue, and CSV export.
 - Responsive desktop and mobile layouts with accessible controls, focus states, loading states, and error handling.
 
@@ -35,7 +35,7 @@ Open `http://127.0.0.1:5173`. The API runs on `http://127.0.0.1:3001` and the pe
 pnpm check
 ```
 
-This runs 102 tests covering API/database workflows, frontend request resilience, report controls, all 12 report renderings, register/case-summary interactions, chart sizing/recovery, registry-shell navigation, mark integrity, design tokens, key colour contrast pairs and repeated-operation stability, followed by a production frontend build. Tests use isolated in-memory databases and DOM fixtures, so they do not alter demonstration data. DOM tests simulate chart dimensions; they do not replace real-browser responsive QA.
+This runs the automated API/database workflows, database-integrity checks, frontend request resilience, report controls, all 15 report renderings, register/case-summary interactions, interview/waitlist workflows, chart sizing/recovery, HKUST shell navigation and responsive stability checks, followed by a production frontend build. Tests use isolated in-memory databases and DOM fixtures, so they do not alter demonstration data. DOM tests simulate chart dimensions; they do not replace real-browser responsive QA.
 
 Run `pnpm audit` to check the locked dependency tree. Use `pnpm install --frozen-lockfile` for repeatable installs.
 
@@ -50,7 +50,7 @@ Open `http://localhost:3003/`. Keep the terminal process running; refresh the br
 
 ## Interactive analysis refinement
 
-- The workspace uses a navy/gold Academic Registry theme. It is a demonstration system and does not represent an official service; all records are fictional.
+- The workspace uses the HKUST official navy/gold identity and official logo assets. It is a student coursework demonstration and does not represent an official service; all records are fictional.
 - Radix UI supplies accessible report-category tabs and focus/hover tooltips; Motion and Recharts share the university-inspired design tokens.
 - Report charts include a measure selector, complete donut categories with toggles, consistent totals, keyboard-accessible charts, and reduced-motion support.
 - Report layouts use container-width breakpoints. Charts measure their own panels, adapt axes/radii, defer drawing below 180px, recover from zero-width containers, and isolate chart exceptions without removing the result table. Long bar charts retain readable row spacing inside a scrollable plot.
@@ -68,6 +68,9 @@ server/app.js        API routes and validation
 server/database.js   Database creation and seed data
 server/schema.sql    Relational schema and constraints
 server/reports.js    Documented SQL report catalogue
+server/migrate.js    Idempotent schema migration runner
+server/migrations/   Versioned migration manifest
+scripts/reset-database.mjs  Verified backup and deterministic rebuild
 tests/               API, client, UI and stability regression suites
 docs/                Final report and report builder
 data/                Persistent local SQLite database
@@ -78,4 +81,18 @@ The implementation includes the relational schema, validation evidence, automate
 
 ## Demonstration route
 
-Start on **Overview**, then show filtering and the tabbed case workspace in **Applications**. Use **New applicant** to demonstrate step validation and the review screen, update profile/assignment/evidence/scholarship workflows, maintain one master record in **Operations**, run several queries in **Reports**, and finish with the schema, rules, and SQL catalogue in **Data model**.
+Start on **Overview**, switch the cycle context, then show filtering and the tabbed case workspace in **Applications**. Use **New applicant** to demonstrate cycle/degree-level offering validation, update profile/assignment/evidence/interview/waitlist/scholarship workflows, maintain cycle and reference records in **Operations**, run all 15 queries in **Reports**, and finish with the schema, physical design, rules and SQL catalogue in **Data model**.
+
+## Database operations
+
+```bash
+pnpm db:reset
+pnpm cloud:backup
+pnpm cloud:migrate
+pnpm cloud:seed -- --replace
+pnpm cloud:verify
+```
+
+`db:reset` verifies and preserves a local backup before rebuilding the two-cycle fictional fixture. Cloud replacement must only be run after a verified Turso backup. The production seed contains 2026 CLOSED and 2027 OPEN cycles with 24 applications per cycle.
+
+Student coursework demonstration. Fictional records. Not an official HKUST service.

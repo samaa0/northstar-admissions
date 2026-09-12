@@ -7,6 +7,7 @@ export default defineConfig({
     // Serial files avoid worker coordination stalls in the iCloud-hosted project folder.
     fileParallelism: false,
     maxWorkers: 1,
+    exclude: ['submission/**', 'tmp/**', 'node_modules/**'],
   },
   server: {
     port: 5173,
