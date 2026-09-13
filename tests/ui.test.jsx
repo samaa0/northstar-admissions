@@ -6,6 +6,7 @@ import App from '../src/App.jsx';
 import DashboardPage from '../src/components/DashboardPage.jsx';
 import ReportsPage from '../src/components/ReportsPage.jsx';
 import DataModelPage from '../src/components/DataModelPage.jsx';
+import ApplicationDrawer from '../src/components/ApplicationDrawer.jsx';
 import { api } from '../src/lib/api.js';
 
 vi.mock('../src/lib/api.js', () => ({ api: vi.fn() }));
@@ -22,6 +23,24 @@ const dashboard = {
   currentCycle: cycles[0],
 };
 const reportDefinition = { id: 'programme-demand', title: 'Programme demand and capacity', category: 'Planning', visual: 'table', purpose: 'Capacity planning', description: 'Live SQL report' };
+const applicationDetail = {
+  application: { id: 42, application_no: 'APP-27-042', applicant_no: 'A27042', first_name: 'Clara', last_name: 'Rossi', email: 'clara@example.com', phone: '+852 51332598', nationality: 'Italy', birth_date: '2003-11-08', degree_level: 'UG', status: 'WAITLISTED', assigned_to: 4, risk_flag: 'MISSING_DOCS' },
+  choices: [{ id: 83, code: 'BSC-QF', name: 'BSc in Quantitative Finance', preference_rank: 1, academic_score: 78.2, capacity: 18, remaining_places: 17 }],
+  education: [],
+  documents: [{ id: 132, document_type: 'ID', file_name: '042_id.pdf', verification_status: 'VERIFIED', reviewer: 'Renee Leung' }],
+  requirements: [{ id: 8, document_type: 'ID', required_by_status: 'SCREENING', verification_status: 'VERIFIED', file_name: '042_id.pdf' }],
+  compliance: { required_count: 3, verified_count: 2, missing_count: 0, pending_count: 1, rejected_count: 0, compliant: 0 },
+  history: [],
+  notes: [],
+  interviews: [{ id: 25, code: 'BSC-QF', scheduled_at: '2026-11-09T16:00:00Z', duration_minutes: 45, mode: 'IN_PERSON', location: 'Academic Building Room 217', status: 'COMPLETED', score: 78.2, panel: 'Marcus Yip (CHAIR)' }],
+  currentDecision: { decision: 'WAITLIST' },
+  waitlist: { status: 'ACTIVE', waitlist_rank: 2, ranking_score: 78.2, remaining_places: 17 },
+  nominations: [],
+  eligibleScholarships: [],
+  activeStaff: [{ id: 2, name: 'Renee Leung', role: 'ADMISSIONS' }, { id: 4, name: 'Iris Kwan', role: 'REVIEWER' }],
+  allowedTransitions: ['OFFERED', 'DECLINED'],
+  transitionRules: [{ status: 'OFFERED', requiresReason: true }, { status: 'DECLINED', requiresReason: true }],
+};
 
 beforeEach(() => {
   vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} });
@@ -34,6 +53,7 @@ beforeEach(() => {
     if (path === '/reports') return [reportDefinition];
     if (path.startsWith('/reports/')) return { ...reportDefinition, rows: [{ code: 'BBA-IS', first_choice_demand: 9, capacity: 20 }], generatedAt: '2026-09-13T00:00:00Z' };
     if (path === '/model') return { summary: { businessRelations: 19, technicalTables: 1, reports: 15 }, tables: [{ name: 'applications', columns: [{ name: 'id' }], foreignKeys: [], indexes: [] }], views: [], triggers: [], indexes: [], migrations: [], relationships: [], businessRules: ['Required evidence must be verified before an offer or acceptance.'], reports: [] };
+    if (path === '/applicants/42') return applicationDetail;
     if (path.startsWith('/applicants')) return { items: [], total: 0, page: 1, pages: 1 };
     throw new Error(`Unexpected test request: ${path}`);
   });
@@ -90,5 +110,22 @@ describe('database-facing workspaces', () => {
     await userEvent.setup().click(screen.getByRole('tab', { name: 'Physical design' }));
     expect(screen.getByText('Views')).toBeTruthy();
     expect(screen.getByText('Triggers')).toBeTruthy();
+  });
+
+  it('renders the evidence, interview and decision case workflows without crashing', async () => {
+    const user = userEvent.setup();
+    render(<ApplicationDrawer applicationId={42} onClose={vi.fn()} onUpdated={vi.fn()} />);
+    await screen.findByRole('heading', { name: 'Clara Rossi' });
+
+    await user.click(screen.getByRole('tab', { name: /Evidence/ }));
+    expect(screen.getByRole('heading', { name: 'Evidence register' })).toBeTruthy();
+
+    await user.click(screen.getByRole('tab', { name: 'Interview' }));
+    expect(screen.getByRole('heading', { name: 'Schedule interview' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Schedule interview' })).toBeTruthy();
+
+    await user.click(screen.getByRole('tab', { name: 'Decision' }));
+    expect(screen.getByRole('heading', { name: 'Application decision' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Waitlist position' })).toBeTruthy();
   });
 });
