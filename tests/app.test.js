@@ -71,10 +71,35 @@ describe('HKUST database foundation', () => {
   it('upgrades a pre-acceptance decisions table without losing its schema history', () => {
     const legacy = new Database(':memory:');
     legacy.exec(schemaSql.replace("'OFFER', 'ACCEPT', 'REJECT'", "'OFFER', 'REJECT'"));
+    legacy.exec(`
+      INSERT INTO staff_users (id, name, email, role)
+      VALUES (99, 'Migration Reviewer', 'migration.reviewer@example.com', 'REVIEWER');
+      INSERT INTO admission_cycles (id, cycle_year, name, opens_at, closes_at, status)
+      VALUES (99, 2099, 'Migration Cycle 2099', '2098-09-01T00:00:00Z', '2099-05-01T00:00:00Z', 'PLANNED');
+      INSERT INTO programmes (id, code, name, school, degree_level)
+      VALUES (99, 'MIG99', 'Migration Test', 'Migration School', 'PG');
+      INSERT INTO programme_offerings (id, programme_id, cycle_id, capacity, application_deadline)
+      VALUES (99, 99, 99, 1, '2099-04-01T00:00:00Z');
+      INSERT INTO applicants (id, applicant_no, first_name, last_name, email, phone, nationality, birth_date)
+      VALUES (99, 'MIG-APP-099', 'Migration', 'Applicant', 'migration.applicant@example.com', '+852 21234567', 'Hong Kong', '2000-01-01');
+      INSERT INTO applications (id, application_no, applicant_id, cycle_id, degree_level, submitted_at, assigned_to)
+      VALUES (99, 'MIG-2099-099', 99, 99, 'PG', '2099-01-01', 99);
+      INSERT INTO application_choices (id, application_id, programme_offering_id, preference_rank, academic_score)
+      VALUES (99, 99, 99, 1, 85);
+      INSERT INTO decisions (id, application_choice_id, decision, rationale, decided_by, decided_at)
+      VALUES (99, 99, 'WAITLIST', 'Initial migration test decision', 99, '2099-02-01');
+      INSERT INTO decisions (id, application_choice_id, decision, rationale, decided_by, decided_at, supersedes_decision_id)
+      VALUES (100, 99, 'OFFER', 'Superseding migration test decision', 99, '2099-02-02', 99);
+    `);
     legacy.prepare('DELETE FROM schema_migrations').run();
     applyMigrations(legacy);
     const definition = legacy.prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'decisions'").get().sql;
     expect(definition).toContain("'ACCEPT'");
+    expect(legacy.prepare('SELECT decision, supersedes_decision_id FROM decisions WHERE id = 100').get()).toEqual({
+      decision: 'OFFER',
+      supersedes_decision_id: 99,
+    });
+    expect(legacy.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'decisions_legacy'").get()).toBeUndefined();
     expect(legacy.prepare('SELECT id FROM schema_migrations WHERE id = ?').get(SCHEMA_VERSION)).toBeTruthy();
     expect(legacy.pragma('integrity_check', { simple: true })).toBe('ok');
     legacy.close();

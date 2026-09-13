@@ -40,6 +40,9 @@ function upgradeDecisionTable(db) {
     SELECT id, application_choice_id, decision, rationale, decided_by, decided_at, supersedes_decision_id
     FROM decisions_legacy;
   `);
+  // The copied rows retain the full chain. Break only the obsolete table's
+  // self-references so ON DELETE RESTRICT does not block its removal.
+  db.exec('UPDATE decisions_legacy SET supersedes_decision_id = NULL');
   db.exec('DROP TABLE decisions_legacy');
 }
 

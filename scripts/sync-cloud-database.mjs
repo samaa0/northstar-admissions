@@ -8,6 +8,31 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
 const sourcePath = process.env.DATABASE_PATH || path.join(root, 'data', 'admissions.db');
 const replace = process.argv.includes('--replace');
+const immutableTriggerSql = [
+  `CREATE TRIGGER IF NOT EXISTS status_history_no_delete
+   BEFORE DELETE ON status_history
+   BEGIN
+     SELECT RAISE(ABORT, 'Status history is append-only');
+   END`,
+  `CREATE TRIGGER IF NOT EXISTS decisions_no_update
+   BEFORE UPDATE ON decisions
+   BEGIN
+     SELECT RAISE(ABORT, 'Decision history is append-only');
+   END`,
+  `CREATE TRIGGER IF NOT EXISTS decisions_no_delete
+   BEFORE DELETE ON decisions
+   BEGIN
+     SELECT RAISE(ABORT, 'Decision history is append-only');
+   END`,
+];
+const orderedReplay = new Set(['application_choices', 'status_history', 'decisions']);
+const orderingByTable = {
+  application_choices: 'ORDER BY application_id, preference_rank, id',
+  decisions: 'ORDER BY id',
+  interview_panel_members: 'ORDER BY interview_session_id, staff_user_id',
+  status_history: 'ORDER BY application_id, datetime(changed_at), id',
+  status_transitions: 'ORDER BY from_status, to_status',
+};
 const tables = [
   'schema_migrations',
   'staff_users',
@@ -63,15 +88,30 @@ try {
       // Append-only audit tables intentionally reject DELETE; a full fixture
       // replacement temporarily removes only those guards inside this transaction.
       await transaction.execute('DROP TRIGGER IF EXISTS status_history_no_delete');
+      await transaction.execute('DROP TRIGGER IF EXISTS decisions_no_update');
       await transaction.execute('DROP TRIGGER IF EXISTS decisions_no_delete');
-      for (const table of [...tables].filter((name) => name !== 'schema_migrations').reverse()) {
+      // Preserve the copied decision chain, but remove self-references from the
+      // obsolete rows before deleting them under ON DELETE RESTRICT.
+      await transaction.execute('UPDATE decisions SET supersedes_decision_id = NULL');
+      for (const table of [...tables].reverse()) {
+        if (table === 'application_choices') {
+          // Keep the contiguous-rank guard active by removing lower-priority
+          // choices before their predecessors, after all dependent rows are gone.
+          for (const rank of [3, 2, 1]) {
+            await transaction.execute({
+              sql: 'DELETE FROM application_choices WHERE preference_rank = ?',
+              args: [rank],
+            });
+          }
+          continue;
+        }
         await transaction.execute(`DELETE FROM "${table}"`);
       }
     }
 
     for (const table of tables) {
       const columns = local.prepare(`PRAGMA table_info("${table}")`).all().map(({ name }) => name);
-      const ordering = table === 'interview_panel_members' ? 'ORDER BY interview_session_id, staff_user_id' : table === 'status_transitions' ? 'ORDER BY from_status, to_status' : 'ORDER BY id';
+      const ordering = orderingByTable[table] ?? 'ORDER BY id';
       const sourceRows = local.prepare(`SELECT * FROM "${table}" ${ordering}`).all();
       const rows = sourceRows.map((row) => {
         if (table === 'interview_sessions' && row.status === 'COMPLETED') {
@@ -82,6 +122,12 @@ try {
       });
       const command = table === 'schema_migrations' ? 'INSERT OR REPLACE' : 'INSERT';
       const sql = `${command} INTO "${table}" (${columns.map((column) => `"${column}"`).join(', ')}) VALUES (${columns.map(() => '?').join(', ')})`;
+      if (orderedReplay.has(table)) {
+        for (const row of rows) {
+          await transaction.execute({ sql, args: columns.map((column) => row[column]) });
+        }
+        continue;
+      }
       for (let index = 0; index < rows.length; index += 100) {
         const statements = rows.slice(index, index + 100).map((row) => ({
           sql,
@@ -97,6 +143,16 @@ try {
         sql: 'UPDATE interview_sessions SET status = ?, score = ?, feedback = ? WHERE id = ?',
         args: ['COMPLETED', interview.score, interview.feedback, interview.id],
       });
+    }
+    for (const triggerSql of immutableTriggerSql) {
+      await transaction.execute(triggerSql);
+    }
+    for (const table of tables) {
+      const expected = local.prepare(`SELECT COUNT(*) AS count FROM "${table}"`).get().count;
+      const actual = Number((await transaction.execute(`SELECT COUNT(*) AS count FROM "${table}"`)).rows[0].count);
+      if (actual !== expected) {
+        throw new Error(`${table} pre-commit verification failed: local=${expected}, cloud=${actual}`);
+      }
     }
     await transaction.commit();
   } catch (error) {
