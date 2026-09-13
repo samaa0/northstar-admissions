@@ -1,0 +1,3 @@
+-- Canonical migration id: 003_acceptance_decision_traceability
+-- Adds ACCEPT to the append-only decision history so OFFERED -> ACCEPTED
+-- retains both the panel outcome and the applicant's acceptance event.

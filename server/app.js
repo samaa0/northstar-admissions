@@ -762,6 +762,12 @@ export function createApp(db) {
             VALUES (?, 'REJECT', ?, ?, ?)
           `).run(choice.id, reason, CURRENT_STAFF_ID, priorDecision?.id ?? null);
         }
+        if (nextStatus === 'ACCEPTED') {
+          await transactionDb.prepare(`
+            INSERT INTO decisions (application_choice_id, decision, rationale, decided_by, supersedes_decision_id)
+            VALUES (?, 'ACCEPT', ?, ?, ?)
+          `).run(choice.id, reason || 'Applicant accepted the programme offer.', CURRENT_STAFF_ID, priorDecision?.id ?? null);
+        }
         if (nextStatus === 'WITHDRAWN') {
           await transactionDb.prepare(`
             UPDATE waitlist_entries SET status = 'REMOVED', handled_by = ?, handled_at = CURRENT_TIMESTAMP

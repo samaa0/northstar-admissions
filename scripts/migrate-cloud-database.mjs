@@ -18,6 +18,10 @@ const existingTables = (await client.execute(`
 const applicationColumns = existingTables.includes('applications')
   ? (await client.execute(`PRAGMA table_info(${quoteIdentifier('applications')})`)).rows.map(({ name }) => String(name))
   : [];
+const decisionDefinition = existingTables.includes('decisions')
+  ? (await client.execute("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'decisions'")).rows[0]?.sql
+  : null;
+const decisionNeedsUpgrade = Boolean(decisionDefinition && !String(decisionDefinition).includes("'ACCEPT'"));
 const legacySchema = applicationColumns.includes('status')
   || applicationColumns.includes('intake_year')
   || !applicationColumns.includes('cycle_id');
@@ -47,6 +51,40 @@ if (legacySchema && existingTables.length) {
   } finally {
     transaction.close();
     await client.execute('PRAGMA foreign_keys = ON');
+  }
+}
+
+if (decisionNeedsUpgrade && !legacySchema) {
+  const transaction = await client.transaction('write');
+  try {
+    await transaction.execute('DROP VIEW IF EXISTS v_current_decisions');
+    await transaction.execute('DROP TRIGGER IF EXISTS decisions_no_update');
+    await transaction.execute('DROP TRIGGER IF EXISTS decisions_no_delete');
+    await transaction.execute('ALTER TABLE decisions RENAME TO decisions_legacy');
+    await transaction.execute(`
+      CREATE TABLE decisions (
+        id INTEGER PRIMARY KEY,
+        application_choice_id INTEGER NOT NULL REFERENCES application_choices(id) ON DELETE RESTRICT,
+        decision TEXT NOT NULL CHECK (decision IN ('OFFER', 'ACCEPT', 'REJECT', 'WAITLIST')),
+        rationale TEXT NOT NULL CHECK (length(trim(rationale)) BETWEEN 5 AND 2000),
+        decided_by INTEGER NOT NULL REFERENCES staff_users(id) ON DELETE RESTRICT,
+        decided_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(decided_at) IS NOT NULL),
+        supersedes_decision_id INTEGER REFERENCES decisions(id) ON DELETE RESTRICT,
+        CHECK (supersedes_decision_id IS NULL OR supersedes_decision_id <> id)
+      ) STRICT;
+    `);
+    await transaction.execute(`
+      INSERT INTO decisions (id, application_choice_id, decision, rationale, decided_by, decided_at, supersedes_decision_id)
+      SELECT id, application_choice_id, decision, rationale, decided_by, decided_at, supersedes_decision_id
+      FROM decisions_legacy;
+    `);
+    await transaction.execute('DROP TABLE decisions_legacy');
+    await transaction.commit();
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  } finally {
+    transaction.close();
   }
 }
 

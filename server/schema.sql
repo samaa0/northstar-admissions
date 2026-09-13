@@ -153,7 +153,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_interview_one_chair
 CREATE TABLE IF NOT EXISTS decisions (
   id INTEGER PRIMARY KEY,
   application_choice_id INTEGER NOT NULL REFERENCES application_choices(id) ON DELETE RESTRICT,
-  decision TEXT NOT NULL CHECK (decision IN ('OFFER', 'REJECT', 'WAITLIST')),
+  decision TEXT NOT NULL CHECK (decision IN ('OFFER', 'ACCEPT', 'REJECT', 'WAITLIST')),
   rationale TEXT NOT NULL CHECK (length(trim(rationale)) BETWEEN 5 AND 2000),
   decided_by INTEGER NOT NULL REFERENCES staff_users(id) ON DELETE RESTRICT,
   decided_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP CHECK (datetime(decided_at) IS NOT NULL),

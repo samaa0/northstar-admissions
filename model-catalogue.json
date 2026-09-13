@@ -1,6 +1,6 @@
 {
   "product": "HKUST Student Admission System",
-  "generatedAt": "2026-09-12T17:44:39.104Z",
+  "generatedAt": "2026-09-13T02:09:13.941Z",
   "summary": {
     "businessRelations": 19,
     "technicalTables": 1,
@@ -523,7 +523,7 @@
           "partial": 0
         }
       ],
-      "rowCount": 28
+      "rowCount": 36
     },
     {
       "name": "document_requirements",
@@ -1919,14 +1919,14 @@
   ],
   "migrations": [
     {
-      "id": "002_hkust_database_integrity",
-      "checksum": "ee82b87d7d7e60cfc943c766a5c4375d5c7c02d203d7562439fe9f80712f1868",
-      "applied_at": "2026-09-12 15:46:40"
+      "id": "003_acceptance_decision_traceability",
+      "checksum": "f1f8598aba5fe0f5f3e858e4e4841fe4da18afc7b07993d1aa8c048684f44099",
+      "applied_at": "2026-09-13 02:09:06"
     },
     {
       "id": "seed",
       "checksum": "2026-09-12-v2",
-      "applied_at": "2026-09-12 15:46:40"
+      "applied_at": "2026-09-13 02:09:06"
     }
   ],
   "relationships": [

@@ -1,9 +1,9 @@
 import fs from 'node:fs';
+import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { isDeepStrictEqual } from 'node:util';
-import request from 'supertest';
 import { createApp } from '../server/app.js';
 import { createDatabase } from '../server/database.js';
 import { reports } from '../server/reports.js';
@@ -23,6 +23,14 @@ const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'northstar-benchmark-'))
 const filename = path.join(directory, 'benchmark.db');
 const db = createDatabase(filename);
 const app = createApp(db);
+const server = http.createServer(app);
+
+await new Promise((resolve, reject) => {
+  server.once('error', reject);
+  server.listen(0, '127.0.0.1', resolve);
+});
+const { port } = server.address();
+const baseUrl = `http://127.0.0.1:${port}`;
 
 const readPaths = [
   '/api/health',
@@ -46,10 +54,26 @@ function round(value) {
   return Number(value.toFixed(2));
 }
 
+async function requestJson(url, { method = 'GET', body, malformed = false } = {}) {
+  const response = await fetch(`${baseUrl}${url}`, {
+    method,
+    headers: body !== undefined || malformed ? { 'Content-Type': 'application/json' } : undefined,
+    body: malformed ? '{bad' : body === undefined ? undefined : JSON.stringify(body),
+  });
+  const raw = await response.text();
+  let parsed;
+  try {
+    parsed = raw ? JSON.parse(raw) : null;
+  } catch {
+    parsed = null;
+  }
+  return { status: response.status, body: parsed };
+}
+
 async function timedRead(url) {
   const started = performance.now();
-  const response = await request(app).get(url);
-  return { status: response.status, latencyMs: performance.now() - started };
+  const response = await requestJson(url);
+  return { ...response, latencyMs: performance.now() - started };
 }
 
 function tableCounts() {
@@ -66,7 +90,7 @@ function tableCounts() {
 
 try {
   for (let index = 0; index < WARM_UP_REQUESTS; index += 1) {
-    const response = await request(app).get(readPaths[index % readPaths.length]);
+    const response = await requestJson(readPaths[index % readPaths.length]);
     if (response.status !== 200) throw new Error(`Warm-up failed for ${readPaths[index % readPaths.length]}`);
   }
 
@@ -89,13 +113,13 @@ try {
 
   const reportChecks = [];
   for (const report of reports) {
-    const response = await request(app).get(`/api/reports/${report.id}`).query({ cycleId: 2 });
+    const response = await requestJson(`/api/reports/${report.id}?cycleId=2`);
     const directRows = db.prepare(report.sql).all({ cycleId: 2, from: null, to: null });
     reportChecks.push({
       id: report.id,
       status: response.status,
-      rows: response.body.rows?.length ?? -1,
-      exactMatch: response.status === 200 && isDeepStrictEqual(response.body.rows, directRows),
+      rows: response.body?.rows?.length ?? -1,
+      exactMatch: response.status === 200 && isDeepStrictEqual(response.body?.rows, directRows),
     });
   }
 
@@ -107,12 +131,12 @@ try {
     places: 2,
   };
   const duplicateResponses = await Promise.all(
-    Array.from({ length: DUPLICATE_WRITE_ATTEMPTS }, () => request(app).post('/api/admin/scholarships').send(duplicatePayload)),
+    Array.from({ length: DUPLICATE_WRITE_ATTEMPTS }, () => requestJson('/api/admin/scholarships', { method: 'POST', body: duplicatePayload })),
   );
   const duplicateStatuses = Object.groupBy(duplicateResponses, ({ status }) => String(status));
 
   const beforeInvalid = tableCounts();
-  const invalidResponse = await request(app).post('/api/applicants').send({
+  const invalidResponse = await requestJson('/api/applicants', { method: 'POST', body: {
     firstName: 'Benchmark',
     lastName: 'Invalid',
     preferredName: '',
@@ -126,11 +150,11 @@ try {
     grade: 'A',
     graduationYear: 2026,
     choices: [{ programmeId: 999999, academicScore: 95 }],
-  });
+  } });
   const afterInvalid = tableCounts();
 
   const beforeValid = tableCounts();
-  const validResponse = await request(app).post('/api/applicants').send({
+  const validResponse = await requestJson('/api/applicants', { method: 'POST', body: {
     firstName: 'Benchmark',
     lastName: 'Valid',
     preferredName: 'Load Test',
@@ -149,7 +173,7 @@ try {
       { offeringId: 7, academicScore: 95 },
       { offeringId: 8, academicScore: 92 },
     ],
-  });
+  } });
   const afterValid = tableCounts();
   const expectedIncrements = {
     applicants: 1,
@@ -163,12 +187,9 @@ try {
 
   const malformedResponses = [];
   for (let index = 0; index < MALFORMED_REQUESTS; index += 1) {
-    malformedResponses.push(await request(app)
-      .post('/api/admin/staff')
-      .set('Content-Type', 'application/json')
-      .send('{bad'));
+    malformedResponses.push(await requestJson('/api/admin/staff', { method: 'POST', malformed: true }));
   }
-  const healthAfterErrors = await request(app).get('/api/health');
+  const healthAfterErrors = await requestJson('/api/health');
 
   const checks = {
     readRequestsSuccessful: failures.length === 0 && latencies.length === READ_REQUESTS,
@@ -198,6 +219,7 @@ try {
       readRequests: READ_REQUESTS,
       concurrency: CONCURRENCY,
       routeCount: readPaths.length,
+      malformedRequests: MALFORMED_REQUESTS,
       durationMs: round(durationMs),
       throughputRequestsPerSecond: round((READ_REQUESTS * 1000) / durationMs),
       latencyMs: {
@@ -222,9 +244,16 @@ try {
     passed: Object.values(checks).every(Boolean),
   };
 
+  result.environment.transport = 'Ephemeral localhost HTTP server exercised through native fetch';
+  const outputFile = process.env.BENCHMARK_OUTPUT_FILE;
+  if (outputFile) {
+    fs.mkdirSync(path.dirname(path.resolve(outputFile)), { recursive: true });
+    fs.writeFileSync(path.resolve(outputFile), `${JSON.stringify(result, null, 2)}\n`);
+  }
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
   if (!result.passed) process.exitCode = 1;
 } finally {
+  await new Promise((resolve) => server.close(resolve));
   db.close();
   fs.rmSync(directory, { recursive: true, force: true });
 }

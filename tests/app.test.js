@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import Database from 'better-sqlite3';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -6,6 +7,7 @@ import request from 'supertest';
 import { createApp } from '../server/app.js';
 import { createDatabase } from '../server/database.js';
 import { reports, runReport } from '../server/reports.js';
+import { applyMigrations, schemaSql, SCHEMA_VERSION } from '../server/migrate.js';
 
 let db;
 let app;
@@ -64,6 +66,18 @@ describe('HKUST database foundation', () => {
     expect(second.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get().count).toBeGreaterThanOrEqual(1);
     second.close();
     fs.rmSync(directory, { recursive: true, force: true });
+  });
+
+  it('upgrades a pre-acceptance decisions table without losing its schema history', () => {
+    const legacy = new Database(':memory:');
+    legacy.exec(schemaSql.replace("'OFFER', 'ACCEPT', 'REJECT'", "'OFFER', 'REJECT'"));
+    legacy.prepare('DELETE FROM schema_migrations').run();
+    applyMigrations(legacy);
+    const definition = legacy.prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'decisions'").get().sql;
+    expect(definition).toContain("'ACCEPT'");
+    expect(legacy.prepare('SELECT id FROM schema_migrations WHERE id = ?').get(SCHEMA_VERSION)).toBeTruthy();
+    expect(legacy.pragma('integrity_check', { simple: true })).toBe('ok');
+    legacy.close();
   });
 });
 
@@ -155,6 +169,16 @@ describe('cycle-aware API and workflows', () => {
     expect(db.prepare('SELECT COUNT(*) AS count FROM status_history WHERE application_id = ?').get(id).count).toBe(before + 1);
     const illegal = await request(app).patch(`/api/applications/${id}/status`).send({ status: 'ACCEPTED' });
     expect(illegal.status).toBe(422);
+  });
+
+  it('records acceptance as an append-only decision after an offer', async () => {
+    const id = db.prepare("SELECT application_id FROM v_application_current_status WHERE current_status = 'OFFERED' AND application_id IN (SELECT id FROM applications WHERE cycle_id = 2) LIMIT 1").get().application_id;
+    const choiceId = db.prepare('SELECT id FROM application_choices WHERE application_id = ? AND preference_rank = 1').get(id).id;
+    const before = db.prepare('SELECT COUNT(*) AS count FROM decisions WHERE application_choice_id = ?').get(choiceId).count;
+    const response = await request(app).patch(`/api/applications/${id}/status`).send({ status: 'ACCEPTED' });
+    expect(response.status).toBe(200);
+    expect(db.prepare("SELECT decision FROM decisions WHERE application_choice_id = ? ORDER BY id DESC LIMIT 1").get(choiceId).decision).toBe('ACCEPT');
+    expect(db.prepare('SELECT COUNT(*) AS count FROM decisions WHERE application_choice_id = ?').get(choiceId).count).toBe(before + 1);
   });
 
   it('handles interview completion and staff panel assignment transactionally', async () => {

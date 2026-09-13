@@ -366,6 +366,21 @@ function seedDatabase(db) {
           } else {
             insertDecision.run(firstChoiceId, 'OFFER', 'Strong academic fit and positive holistic review.', staffId, decisionTime, null);
           }
+          if (finalStatus === 'ACCEPTED') {
+            const offerDecision = db.prepare(`
+              SELECT id FROM decisions
+              WHERE application_choice_id = ? AND decision = 'OFFER'
+              ORDER BY datetime(decided_at) DESC, id DESC LIMIT 1
+            `).get(firstChoiceId);
+            insertDecision.run(
+              firstChoiceId,
+              'ACCEPT',
+              'Applicant accepted the programme offer.',
+              staffId,
+              new Date(new Date(decisionTime).getTime() + 24 * 3_600_000).toISOString(),
+              offerDecision?.id ?? null,
+            );
+          }
         } else if (finalStatus === 'DECLINED') {
           insertDecision.run(
             firstChoiceId,

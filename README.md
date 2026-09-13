@@ -1,6 +1,6 @@
 # HKUST Student Admission System
 
-HKUST Student Admission System is a complete admissions decision desk with a responsive React interface, a validated Express API, and a normalized 19-relation relational database. The local application uses SQLite, while the production deployment uses the equivalent persistent Turso/libSQL database. The system includes admission cycles, annual programme offerings, ranked choices, requirement-driven evidence, review workflows, append-only audit history, interviews, panels, waitlists, scholarships, and 15 live managerial reports.
+HKUST Student Admission System is a complete admissions decision desk with a responsive React interface, a validated Express API, and a normalized 19-relation relational database. The local demonstration uses SQLite, while the Vercel/Turso deployment target is configured for the equivalent persistent libSQL database and must be re-verified after each release. The system includes admission cycles, annual programme offerings, ranked choices, requirement-driven evidence, review workflows, append-only audit history, interviews, panels, waitlists, scholarships, and 15 live managerial reports.
 
 Live system: https://northstar-admissions-bay.vercel.app
 
