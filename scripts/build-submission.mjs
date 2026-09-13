@@ -43,6 +43,7 @@ for (const directory of ['api', 'public', 'server', 'src', 'tests', 'scripts']) 
   copyTree(path.join(root, directory), path.join(submission, '02_Working_System', directory), excluded);
 }
 fs.copyFileSync(path.join(root, 'data', 'admissions.db'), path.join(submission, '02_Working_System', 'data', 'admissions.db'));
+fs.copyFileSync(path.join(root, 'model-catalogue.json'), path.join(submission, '02_Working_System', 'model-catalogue.json'));
 fs.copyFileSync(path.join(root, 'README.md'), path.join(submission, '01_Documentation', 'README_Project.md'));
 for (const file of ['ISOM5260_Student_Admission_System_Final_Report.docx', 'ISOM5260_Student_Admission_System_Final_Report.pdf']) {
   fs.copyFileSync(path.join(root, 'docs', file), path.join(submission, '01_Documentation', file));
@@ -67,6 +68,12 @@ const walk = (directory) => {
 walk(submission);
 if (files.some((file) => /\.db-(?:wal|shm)$|\.DS_Store$|\.icloud-placeholder$|\.env\.local$/.test(file))) {
   throw new Error('Submission contains excluded temporary or credential files');
+}
+const workingCatalogue = JSON.parse(
+  fs.readFileSync(path.join(submission, '02_Working_System', 'model-catalogue.json'), 'utf8'),
+);
+if (workingCatalogue.summary?.businessRelations !== 19) {
+  throw new Error('Working System is missing the generated 19-relation model catalogue');
 }
 console.log(`Submission rebuilt: ${files.length} files in ${path.relative(root, submission)}`);
 console.log(`Create ${path.basename(zipPath)} with: zip -r -X ${path.basename(zipPath)} submission`);
