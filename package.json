@@ -17,6 +17,7 @@
     "cloud:seed": "node --env-file=.env.local scripts/sync-cloud-database.mjs",
     "cloud:sync": "node --env-file=.env.local scripts/sync-cloud-database.mjs",
     "cloud:verify": "node --env-file=.env.local scripts/verify-cloud.mjs",
+    "production:verify": "node scripts/verify-production.mjs",
     "check": "npm test && npm run build"
   },
   "dependencies": {
