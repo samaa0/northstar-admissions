@@ -5,7 +5,14 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const submission = path.join(root, 'submission');
 const zipPath = path.join(root, 'ISOM5260_Submission_CHUI_Hung_Sum_21241047_FINAL.zip');
+const databasePath = process.env.SUBMISSION_DATABASE_PATH
+  ? path.resolve(process.env.SUBMISSION_DATABASE_PATH)
+  : path.join(root, 'data', 'admissions.db');
 const shouldReplace = process.argv.includes('--replace');
+
+if (!fs.existsSync(databasePath)) {
+  throw new Error(`Submission database does not exist: ${databasePath}`);
+}
 
 if (fs.existsSync(submission) && !shouldReplace) {
   throw new Error('submission/ already exists; pass --replace after preserving any prior package');
@@ -42,7 +49,7 @@ for (const file of ['README.md', 'package.json', 'pnpm-lock.yaml', 'pnpm-workspa
 for (const directory of ['api', 'public', 'server', 'src', 'tests', 'scripts']) {
   copyTree(path.join(root, directory), path.join(submission, '02_Working_System', directory), excluded);
 }
-fs.copyFileSync(path.join(root, 'data', 'admissions.db'), path.join(submission, '02_Working_System', 'data', 'admissions.db'));
+fs.copyFileSync(databasePath, path.join(submission, '02_Working_System', 'data', 'admissions.db'));
 fs.copyFileSync(path.join(root, 'model-catalogue.json'), path.join(submission, '02_Working_System', 'model-catalogue.json'));
 fs.copyFileSync(path.join(root, 'README.md'), path.join(submission, '01_Documentation', 'README_Project.md'));
 for (const file of ['ISOM5260_Student_Admission_System_Final_Report.docx', 'ISOM5260_Student_Admission_System_Final_Report.pdf']) {
@@ -51,7 +58,7 @@ for (const file of ['ISOM5260_Student_Admission_System_Final_Report.docx', 'ISOM
 fs.copyFileSync(path.join(root, 'server', 'schema.sql'), path.join(submission, '03_Database', 'schema.sql'));
 fs.copyFileSync(path.join(root, 'server', 'reports.js'), path.join(submission, '03_Database', 'reports.js'));
 fs.copyFileSync(path.join(root, 'model-catalogue.json'), path.join(submission, '03_Database', 'model-catalogue.json'));
-fs.copyFileSync(path.join(root, 'data', 'admissions.db'), path.join(submission, '03_Database', 'admissions.db'));
+fs.copyFileSync(databasePath, path.join(submission, '03_Database', 'admissions.db'));
 for (const file of ['ISOM5260 Substitute Project description.v1.pdf', 'ISOM5260 Project Grading Rubrics_Fall2026.pdf']) {
   fs.copyFileSync(path.join(root, file), path.join(submission, '04_Reference', file));
 }

@@ -203,7 +203,7 @@ export default function ApplicationDrawer({ applicationId, onClose, onUpdated })
         variants={{ closed: { opacity: 0, x: 28 }, open: { opacity: 1, x: 0 } }}
       >
         <div className="drawer-topbar case-topbar">
-          <div><span>HKUST · Student Admission System</span><strong>Application case</strong></div>
+          <strong>Application case</strong>
           <button data-dialog-initial className="icon-button" type="button" onClick={onClose} aria-label="Close application details"><X size={19} /></button>
         </div>
         {error ? <div className="drawer-error" role="alert"><AlertTriangle size={16} />{error}<button type="button" onClick={() => setError('')} aria-label="Dismiss error"><X size={14} /></button></div> : null}
@@ -288,7 +288,7 @@ function EvidencePanel({ data, progress, newDocument, setNewDocument, busy, onAd
       </section>
       <section className="case-section">
         <header className="case-section-heading"><div><FileCheck2 size={17} /><div><h3>Evidence register</h3><p>{progress.verified} verified · {progress.total - progress.verified} outstanding</p></div></div></header>
-        <div className="document-register-list">{(data.requirements || []).map((requirement) => { const document = data.documents.find(({ document_type: type }) => type === requirement.document_type); const status = document?.verification_status || 'MISSING'; return <article key={requirement.id} className={`document-record document-${status.toLowerCase()}`}><span className="document-status-icon">{status === 'VERIFIED' ? <FileCheck2 size={17} /> : status === 'REJECTED' ? <ShieldAlert size={17} /> : <FileWarning size={17} />}</span><div><strong>{titleCase(requirement.document_type)}</strong><span className="mono-file">{document?.file_name || 'Not registered'}</span><small>Required by {titleCase(requirement.required_by_status)}{document?.reviewer ? ` · checked by ${document.reviewer}` : ''}</small></div><StatusBadge status={status} subtle />{document ? <div className="document-actions"><button className="icon-button action-verify" type="button" title="Verify document" aria-label={`Verify ${titleCase(requirement.document_type)}`} disabled={Boolean(busy)} onClick={() => onChangeStatus(document.id, 'VERIFIED')}><CheckCircle2 size={16} /></button><button className="icon-button action-reject" type="button" title="Reject document" aria-label={`Reject ${titleCase(requirement.document_type)}`} disabled={Boolean(busy)} onClick={() => onChangeStatus(document.id, 'REJECTED')}><XCircle size={16} /></button><button className="icon-button" type="button" title="Return to pending" aria-label={`Mark ${titleCase(requirement.document_type)} pending`} disabled={Boolean(busy)} onClick={() => onChangeStatus(document.id, 'PENDING')}><Clock3 size={16} /></button></div> : null}</article>; })}</div>
+        <div className="document-register-list">{(data.requirements || []).map((requirement) => { const document = data.documents.find(({ document_type: type }) => type === requirement.document_type); const status = document?.verification_status || 'MISSING'; return <article key={requirement.id} className={`document-record document-${status.toLowerCase()}`}><span className="document-status-icon">{status === 'VERIFIED' ? <FileCheck2 size={17} /> : status === 'REJECTED' ? <ShieldAlert size={17} /> : <FileWarning size={17} />}</span><div><strong>{titleCase(requirement.document_type)}</strong><span className="mono-file">{document?.file_name || 'Not registered'}</span><small>Required by {titleCase(requirement.required_by_status)}{document?.reviewer ? ` · checked by ${document.reviewer}` : ''}</small></div><StatusBadge status={status} subtle />{document ? <div className="document-actions">{status === 'PENDING' ? <><button className="icon-button action-verify" type="button" title="Verify document" aria-label={`Verify ${titleCase(requirement.document_type)}`} disabled={Boolean(busy)} onClick={() => onChangeStatus(document.id, 'VERIFIED')}><CheckCircle2 size={16} /></button><button className="icon-button action-reject" type="button" title="Reject document" aria-label={`Reject ${titleCase(requirement.document_type)}`} disabled={Boolean(busy)} onClick={() => onChangeStatus(document.id, 'REJECTED')}><XCircle size={16} /></button></> : <button className="icon-button" type="button" title="Return to pending" aria-label={`Mark ${titleCase(requirement.document_type)} pending`} disabled={Boolean(busy)} onClick={() => onChangeStatus(document.id, 'PENDING')}><Clock3 size={16} /></button>}</div> : null}</article>; })}</div>
       </section>
     </div>
   );
@@ -359,7 +359,30 @@ function ActivityPanel({ data, note, setNote, busy, onAddNote }) {
         <header className="case-section-heading"><div><MessageSquarePlus size={17} /><div><h3>Internal note</h3><p>Notes become part of the case audit record</p></div></div></header>
         <form className="note-composer" onSubmit={onAddNote}><textarea value={note} onChange={(event) => setNote(event.target.value)} placeholder="Add an internal review note" minLength="2" maxLength="1000" required /><button className="button button-primary" type="submit" disabled={busy === 'note' || note.trim().length < 2}>{busy === 'note' ? <LoaderCircle className="spin" size={16} /> : <Send size={16} />}Add note</button></form>
       </section>
-      <section className="case-section"><header className="case-section-heading"><div><Clock3 size={17} /><div><h3>Audit activity</h3><p>{activity.length} recorded events</p></div></div></header>{activity.length ? <div className="activity-timeline">{activity.map((item) => <div className="activity-item" key={`${item.kind}-${item.id}`}><span className={`activity-marker ${item.kind}`} /><div>{item.kind === 'note' ? <p>{item.note}</p> : <p><strong>{titleCase(item.to_status)}</strong>{item.note ? ` · ${item.note}` : ''}</p>}<span>{item.kind === 'note' ? item.author : item.changed_by_name} · {formatDateTime(item.at)}</span></div></div>)}</div> : <EmptyState title="No activity" detail="No audit events have been recorded." />}</section>
+      <section className="case-section">
+        <header className="case-section-heading"><div><Clock3 size={17} /><div><h3>Audit activity</h3><p>{activity.length} recorded events</p></div></div></header>
+        {activity.length ? (
+          <ol className="activity-timeline" aria-label="Audit activity">
+            {activity.map((item) => {
+              const isNote = item.kind === 'note';
+              const actor = isNote ? item.author : item.changed_by_name;
+              return (
+                <li className="activity-item" key={`${item.kind}-${item.id}`}>
+                  <span className={`activity-marker ${item.kind}`} aria-hidden="true" />
+                  <div className="activity-item-content">
+                    <div className="activity-item-heading">
+                      <strong>{isNote ? 'Internal note' : titleCase(item.to_status)}</strong>
+                      <span className={`activity-kind ${item.kind}`}>{isNote ? 'Note' : 'Status change'}</span>
+                    </div>
+                    {item.note ? <p className="activity-detail">{item.note}</p> : null}
+                    <div className="activity-meta"><span>{actor || 'System'}</span><time dateTime={item.at}>{formatDateTime(item.at)}</time></div>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        ) : <EmptyState title="No activity" detail="No audit events have been recorded." />}
+      </section>
     </div>
   );
 }

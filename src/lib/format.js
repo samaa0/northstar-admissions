@@ -19,6 +19,33 @@ export function formatDateTime(value) {
   }).format(new Date(value));
 }
 
+const dateTimeLocalPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/;
+
+export function toDateTimeLocalValue(value) {
+  if (!value) return '';
+  const text = String(value);
+  if (dateTimeLocalPattern.test(text) && !/[zZ]|[+-]\d{2}:\d{2}$/.test(text.slice(16))) {
+    return text.slice(0, 16);
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const pad = (part) => String(part).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+export function toIsoDateTime(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '' : date.toISOString();
+}
+
+export function readDateTimeLocalValue(event, currentValue = '') {
+  const value = event.target.value;
+  if (!value && event.target.validity?.badInput) return currentValue;
+  if (value && !dateTimeLocalPattern.test(value)) return currentValue;
+  return value;
+}
+
 export function titleCase(value = '') {
   const acronymWords = new Set(['API', 'CSV', 'CV', 'FK', 'ID', 'PK', 'SQL']);
   return value

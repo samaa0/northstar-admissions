@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from '../src/App.jsx';
 import DashboardPage from '../src/components/DashboardPage.jsx';
@@ -27,8 +27,16 @@ const applicationDetail = {
   application: { id: 42, application_no: 'APP-27-042', applicant_no: 'A27042', first_name: 'Clara', last_name: 'Rossi', email: 'clara@example.com', phone: '+852 51332598', nationality: 'Italy', birth_date: '2003-11-08', degree_level: 'UG', status: 'WAITLISTED', assigned_to: 4, risk_flag: 'MISSING_DOCS' },
   choices: [{ id: 83, code: 'BSC-QF', name: 'BSc in Quantitative Finance', preference_rank: 1, academic_score: 78.2, capacity: 18, remaining_places: 17 }],
   education: [],
-  documents: [{ id: 132, document_type: 'ID', file_name: '042_id.pdf', verification_status: 'VERIFIED', reviewer: 'Renee Leung' }],
-  requirements: [{ id: 8, document_type: 'ID', required_by_status: 'SCREENING', verification_status: 'VERIFIED', file_name: '042_id.pdf' }],
+  documents: [
+    { id: 132, document_type: 'ID', file_name: '042_id.pdf', verification_status: 'VERIFIED', reviewer: 'Renee Leung' },
+    { id: 133, document_type: 'TRANSCRIPT', file_name: '042_transcript.pdf', verification_status: 'PENDING', reviewer: null },
+    { id: 134, document_type: 'CV', file_name: '042_cv.pdf', verification_status: 'REJECTED', reviewer: 'Renee Leung' },
+  ],
+  requirements: [
+    { id: 8, document_type: 'ID', required_by_status: 'SCREENING', verification_status: 'VERIFIED', file_name: '042_id.pdf' },
+    { id: 9, document_type: 'TRANSCRIPT', required_by_status: 'SCREENING', verification_status: 'PENDING', file_name: '042_transcript.pdf' },
+    { id: 10, document_type: 'CV', required_by_status: 'REVIEW', verification_status: 'REJECTED', file_name: '042_cv.pdf' },
+  ],
   compliance: { required_count: 3, verified_count: 2, missing_count: 0, pending_count: 1, rejected_count: 0, compliant: 0 },
   history: [],
   notes: [],
@@ -67,6 +75,8 @@ describe('HKUST branded shell', () => {
     await screen.findByRole('heading', { name: 'Admissions overview' });
     expect(screen.getByRole('img', { name: 'HKUST logo' }).getAttribute('src')).toBe('/hkust-logo-white.svg');
     expect(document.querySelector('.university-name').textContent).toContain('香港科技大學');
+    expect(document.querySelector('.workspace-context img')).toBeNull();
+    expect(document.querySelector('.workspace-context .context-university-name').textContent).toBe('HKUST');
     expect(screen.getAllByText('Student Admission System').length).toBeGreaterThanOrEqual(2);
     expect(screen.getByLabelText('Current admission cycle').value).toBe('2');
     expect(screen.getByText('Student coursework demonstration. Fictional records. Not an official HKUST service.')).toBeTruthy();
@@ -119,10 +129,25 @@ describe('database-facing workspaces', () => {
 
     await user.click(screen.getByRole('tab', { name: /Evidence/ }));
     expect(screen.getByRole('heading', { name: 'Evidence register' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Verify ID' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Reject ID' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Mark ID pending' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Verify Transcript' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Reject Transcript' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Mark Transcript pending' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Verify CV' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Reject CV' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Mark CV pending' })).toBeTruthy();
 
     await user.click(screen.getByRole('tab', { name: 'Interview' }));
     expect(screen.getByRole('heading', { name: 'Schedule interview' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Schedule interview' })).toBeTruthy();
+    const scheduledDate = screen.getByLabelText('Scheduled date');
+    const scheduledTime = screen.getByLabelText('Scheduled time');
+    fireEvent.change(scheduledDate, { target: { value: '2026-11-09' } });
+    fireEvent.change(scheduledTime, { target: { value: '10:00' } });
+    expect(scheduledDate.value).toBe('2026-11-09');
+    expect(scheduledTime.value).toBe('10:00');
 
     await user.click(screen.getByRole('tab', { name: 'Decision' }));
     expect(screen.getByRole('heading', { name: 'Application decision' })).toBeTruthy();

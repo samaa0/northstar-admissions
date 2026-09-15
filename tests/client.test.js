@@ -4,6 +4,7 @@ import { chartFields, filterAndSortRows } from '../src/lib/reportData.js';
 import { chartLayout } from '../src/lib/chartLayout.js';
 import { readFileSync } from 'node:fs';
 import { universityColors, universityChartColors } from '../src/lib/universityTheme.js';
+import { readDateTimeLocalValue, toDateTimeLocalValue, toIsoDateTime } from '../src/lib/format.js';
 
 afterEach(() => { vi.unstubAllGlobals(); vi.useRealTimers(); });
 
@@ -79,6 +80,18 @@ describe('chart geometry', () => {
   it('allocates row height rather than overlapping category labels', () => {
     expect(chartLayout(280, 'bar', 30).height).toBe(1076);
     expect(chartLayout(280, 'bar', NaN).height).toBe(260);
+  });
+});
+
+describe('datetime-local values', () => {
+  it('keeps complete local values and ignores incomplete picker input', () => {
+    expect(toDateTimeLocalValue('2026-11-09T16:00')).toBe('2026-11-09T16:00');
+    expect(toDateTimeLocalValue('2026-11-09T16:00:00.000Z')).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/);
+    expect(toIsoDateTime('2026-11-09T16:00')).toBe(new Date('2026-11-09T16:00').toISOString());
+    expect(readDateTimeLocalValue({ target: { value: '2026-11-09T10:00', validity: { badInput: false } } }, '')).toBe('2026-11-09T10:00');
+    expect(readDateTimeLocalValue({ target: { value: '', validity: { badInput: true } } }, '2026-11-09T10:00')).toBe('2026-11-09T10:00');
+    expect(readDateTimeLocalValue({ target: { value: '2026-11-09', validity: { badInput: false } } }, '2026-11-09T10:00')).toBe('2026-11-09T10:00');
+    expect(readDateTimeLocalValue({ target: { value: '', validity: { badInput: false } } }, '2026-11-09T10:00')).toBe('');
   });
 });
 

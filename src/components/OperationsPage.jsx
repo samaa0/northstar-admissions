@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Archive, BadgeDollarSign, CalendarDays, Edit3, LoaderCircle, Plus, RotateCcw, ShieldCheck, Users, X } from 'lucide-react';
 import { api } from '../lib/api.js';
-import { formatDate, titleCase } from '../lib/format.js';
+import { formatDate, readDateTimeLocalValue, titleCase, toDateTimeLocalValue } from '../lib/format.js';
 import { useDialogFocus } from '../lib/useDialogFocus.js';
 import { EmptyState, LoadingBlock, StatusBadge } from './Ui.jsx';
 
@@ -21,7 +21,7 @@ const blankForms = {
 
 function toForm(type, record) {
   if (!record) return { ...blankForms[type] };
-  if (type === 'cycles') return { cycleYear: String(record.cycle_year), name: record.name, opensAt: record.opens_at, closesAt: record.closes_at, status: record.status };
+  if (type === 'cycles') return { cycleYear: String(record.cycle_year), name: record.name, opensAt: toDateTimeLocalValue(record.opens_at), closesAt: toDateTimeLocalValue(record.closes_at), status: record.status };
   if (type === 'programmes') {
     return {
       code: record.code,
@@ -326,8 +326,8 @@ function CatalogueFields({ type, form, errors, onChange }) {
   return <><Field label="Scholarship code" name="code" value={form.code} error={errors.code} onChange={onChange} required /><Field label="Scholarship name" name="name" value={form.name} error={errors.name} onChange={onChange} required wide /><Field label="Amount (HKD)" name="amountHkd" value={form.amountHkd} error={errors.amountHkd} onChange={onChange} type="number" min="1" required /><Field label="Minimum score" name="minimumScore" value={form.minimumScore} error={errors.minimumScore} onChange={onChange} type="number" min="0" max="100" step="0.1" required /><Field label="Award places" name="places" value={form.places} error={errors.places} onChange={onChange} type="number" min="1" required /></>;
 }
 
-function Field({ label, name, value, error, onChange, wide, ...props }) {
-  return <label className={`field ${wide ? 'full-field' : ''} ${error ? 'field-error' : ''}`}><span>{label}</span><input value={value} onChange={(event) => onChange(name, event.target.value)} {...props} />{error ? <small>{error}</small> : null}</label>;
+function Field({ label, name, value, error, onChange, wide, type, ...props }) {
+  return <label className={`field ${wide ? 'full-field' : ''} ${error ? 'field-error' : ''}`}><span>{label}</span><input type={type} value={value} onChange={(event) => onChange(name, type === 'datetime-local' ? readDateTimeLocalValue(event, value) : event.target.value)} {...props} />{error ? <small>{error}</small> : null}</label>;
 }
 
 function SelectField({ label, name, value, error, onChange, options, wide }) {
@@ -411,8 +411,8 @@ function CycleDetail({ cycle, onClose, onUpdated }) {
     {error ? <div className="inline-alert" role="alert"><ShieldCheck size={16} /><span>{error}</span></div> : null}
     <div className="cycle-detail-grid">
       <section className="cycle-detail-section"><div className="section-heading"><div><span className="eyebrow">Programme × cycle</span><h3>Programme offerings</h3></div><span>{offerings.length} configured</span></div>
-        <form className="inline-create-form" onSubmit={createOffering}><select aria-label="Offering programme" value={offeringForm.programmeId} onChange={(event) => setOfferingForm((current) => ({ ...current, programmeId: event.target.value }))}><option value="">Programme</option>{programmes.map((programme) => <option value={programme.id} key={programme.id}>{programme.code}</option>)}</select><input aria-label="Offering capacity" type="number" min="1" placeholder="Capacity" value={offeringForm.capacity} onChange={(event) => setOfferingForm((current) => ({ ...current, capacity: event.target.value }))} required /><input aria-label="Offering deadline" type="datetime-local" value={offeringForm.applicationDeadline} onChange={(event) => setOfferingForm((current) => ({ ...current, applicationDeadline: event.target.value }))} required /><button className="button button-secondary" type="submit" disabled={busy === 'new-offering'}><Plus size={15} />Add offering</button></form>
-        <div className="cycle-offering-list">{offerings.map((offering) => <div className="cycle-offering-row" key={offering.id}><div><strong>{offering.code}</strong><span>{offering.degree_level} · {offering.first_choice_demand} first-choice demand · {offering.accepted_count} accepted · {offering.remaining_places} remaining</span></div><input aria-label={`${offering.code} capacity`} type="number" min="1" value={offering.capacity} onChange={(event) => setOfferings((current) => current.map((row) => row.id === offering.id ? { ...row, capacity: event.target.value } : row))} /><input aria-label={`${offering.code} deadline`} type="datetime-local" value={toLocalDateTime(offering.application_deadline)} onChange={(event) => setOfferings((current) => current.map((row) => row.id === offering.id ? { ...row, application_deadline: event.target.value } : row))} /><button className="icon-button" type="button" onClick={() => saveOffering(offering)} disabled={busy === `offering-${offering.id}`} aria-label={`Save ${offering.code} offering`} title="Save offering"><Edit3 size={15} /></button></div>)}</div>
+        <form className="inline-create-form" onSubmit={createOffering}><select aria-label="Offering programme" value={offeringForm.programmeId} onChange={(event) => setOfferingForm((current) => ({ ...current, programmeId: event.target.value }))}><option value="">Programme</option>{programmes.map((programme) => <option value={programme.id} key={programme.id}>{programme.code}</option>)}</select><input aria-label="Offering capacity" type="number" min="1" placeholder="Capacity" value={offeringForm.capacity} onChange={(event) => setOfferingForm((current) => ({ ...current, capacity: event.target.value }))} required /><input aria-label="Offering deadline" type="datetime-local" value={offeringForm.applicationDeadline} onChange={(event) => setOfferingForm((current) => ({ ...current, applicationDeadline: readDateTimeLocalValue(event, current.applicationDeadline) }))} required /><button className="button button-secondary" type="submit" disabled={busy === 'new-offering'}><Plus size={15} />Add offering</button></form>
+        <div className="cycle-offering-list">{offerings.map((offering) => <div className="cycle-offering-row" key={offering.id}><div><strong>{offering.code}</strong><span>{offering.degree_level} · {offering.first_choice_demand} first-choice demand · {offering.accepted_count} accepted · {offering.remaining_places} remaining</span></div><input aria-label={`${offering.code} capacity`} type="number" min="1" value={offering.capacity} onChange={(event) => setOfferings((current) => current.map((row) => row.id === offering.id ? { ...row, capacity: event.target.value } : row))} /><input aria-label={`${offering.code} deadline`} type="datetime-local" value={toDateTimeLocalValue(offering.application_deadline)} onChange={(event) => setOfferings((current) => current.map((row) => row.id === offering.id ? { ...row, application_deadline: readDateTimeLocalValue(event, toDateTimeLocalValue(row.application_deadline)) } : row))} /><button className="icon-button" type="button" onClick={() => saveOffering(offering)} disabled={busy === `offering-${offering.id}`} aria-label={`Save ${offering.code} offering`} title="Save offering"><Edit3 size={15} /></button></div>)}</div>
       </section>
       <section className="cycle-detail-section"><div className="section-heading"><div><span className="eyebrow">Evidence policy</span><h3>Document requirements</h3></div><span>{requirements.filter(({ active }) => active === 1).length} active</span></div>
         <form className="inline-create-form requirement-form" onSubmit={createRequirement}><select aria-label="Requirement degree level" value={requirementForm.degreeLevel} onChange={(event) => setRequirementForm((current) => ({ ...current, degreeLevel: event.target.value }))}><option value="UG">UG</option><option value="PG">PG</option></select><select aria-label="Requirement document type" value={requirementForm.documentType} onChange={(event) => setRequirementForm((current) => ({ ...current, documentType: event.target.value }))}>{['ID', 'TRANSCRIPT', 'CV', 'PERSONAL_STATEMENT', 'REFERENCE'].map((value) => <option value={value} key={value}>{value}</option>)}</select><select aria-label="Requirement stage" value={requirementForm.requiredByStatus} onChange={(event) => setRequirementForm((current) => ({ ...current, requiredByStatus: event.target.value }))}>{['SUBMITTED', 'SCREENING', 'REVIEW', 'INTERVIEW', 'WAITLISTED', 'OFFERED'].map((value) => <option value={value} key={value}>{titleCase(value)}</option>)}</select><button className="button button-secondary" type="submit" disabled={busy === 'new-requirement'}><Plus size={15} />Add requirement</button></form>
@@ -420,10 +420,6 @@ function CycleDetail({ cycle, onClose, onUpdated }) {
       </section>
     </div>
   </div>;
-}
-
-function toLocalDateTime(value) {
-  return value ? String(value).slice(0, 16) : '';
 }
 
 function ConfirmationDialog({ record, type, busy, onClose, onConfirm }) {

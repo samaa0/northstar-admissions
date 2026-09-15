@@ -151,7 +151,7 @@ export default function App() {
           <div className="topbar-title">
             <button className="icon-button mobile-only" type="button" onClick={() => setMobileNav(true)} aria-label="Open navigation"><Menu size={20} /></button>
             <div className="workspace-heading">
-            <span className="workspace-context"><span className="context-university-name">HKUST</span><img className="compact-hkust-logo" src="/hkust-logo-color.svg" alt="" aria-hidden="true" /><span className="context-divider" aria-hidden="true">/</span><span className="context-project-name">Student Admission System</span><span className="context-project-short">Admissions</span></span>
+            <span className="workspace-context"><span className="context-university-name">HKUST</span><span className="context-divider" aria-hidden="true">/</span><span className="context-project-name">Student Admission System</span><span className="context-project-short">Admissions</span></span>
             <AnimatePresence mode="wait" initial={false}>
               <motion.div className="topbar-current" key={view} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 6 }}>
                 <activeNav.icon size={18} className="title-icon" />

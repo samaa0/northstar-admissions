@@ -63,7 +63,6 @@
 .brand-lockup .university-identity { display: flex; flex-direction: column; min-width: 0; gap: 14px; }
 .hkust-logo { display: block; width: min(172px, 100%); height: auto; object-fit: contain; object-position: left center; }
 .hkust-logo-reversed { width: 170px; max-height: 56px; }
-.compact-hkust-logo { display: block; width: 82px; height: 25px; object-fit: contain; object-position: left center; }
 .cycle-block label { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
 .cycle-block select { width: 100%; min-width: 0; color: #fff; background: transparent; border: 0; font-size: 12px; font-weight: 600; }
 .cycle-block select option { color: var(--ink); background: #fff; }
@@ -108,7 +107,8 @@
 .workspace-heading { display: flex; flex-direction: column; gap: 5px; }
 .workspace-context { display: flex; align-items: center; gap: 7px; color: var(--ink-soft); font-size: 10px; font-weight: 400; white-space: nowrap; }
 .workspace-context .context-divider { color: var(--university-gold); }
-.context-university-name, .context-project-short { display: none; }
+.context-university-name { display: inline; color: var(--university-navy); font-family: 'IBM Plex Mono', monospace; font-size: 9px; font-weight: 600; }
+.context-project-short { display: none; }
 .compact-university-logo { display: none; }
 .topbar-current { font-size: 12px; }
 .topbar-current > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -415,7 +415,6 @@
   .workspace-context { gap: 5px; font-size: 9px; }
   .workspace-context .context-project-name, .workspace-context .context-divider { display: none; }
   .context-project-short { display: inline; }
-  .compact-university-logo { width: 74px; padding: 4px 6px; }
   .topbar-current { font-size: 11px; }
   .page-intro h1 { font-size: 28px; }
   .dashboard-intro { gap: 16px; }

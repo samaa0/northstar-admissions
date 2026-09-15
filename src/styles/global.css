@@ -1842,53 +1842,102 @@ p {
 }
 
 .activity-timeline {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  margin-top: 20px;
-  padding-left: 18px;
+  display: grid;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
 }
 
-.activity-timeline::before {
+.activity-item {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 16px minmax(0, 1fr);
+  gap: 12px;
+  padding-bottom: 18px;
+}
+
+.activity-item:not(:last-child)::before {
   position: absolute;
-  top: 5px;
-  bottom: 8px;
-  left: 4px;
+  z-index: 0;
+  top: 14px;
+  bottom: -3px;
+  left: 7px;
   width: 1px;
   background: var(--line-strong);
   content: '';
 }
 
-.activity-item {
-  position: relative;
-}
-
 .activity-marker {
-  position: absolute;
-  top: 4px;
-  left: -18px;
-  width: 9px;
-  height: 9px;
+  position: relative;
+  z-index: 1;
+  width: 15px;
+  height: 15px;
+  margin-top: 1px;
   background: #fff;
-  border: 2px solid var(--teal);
+  border: 2px solid var(--blue);
   border-radius: 50%;
+  box-shadow: 0 0 0 3px #fff;
 }
 
 .activity-marker.note {
   border-color: var(--saffron);
 }
 
-.activity-item p {
-  margin-bottom: 3px;
-  color: var(--ink);
-  font-size: 10px;
+.activity-item-content {
+  min-width: 0;
+}
+
+.activity-item-heading {
+  display: flex;
+  min-height: 16px;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.activity-item-heading strong {
+  overflow-wrap: anywhere;
+  font-size: 11px;
   line-height: 1.45;
 }
 
-.activity-item span {
-  color: var(--ink-faint);
+.activity-kind {
+  flex: 0 0 auto;
+  color: var(--blue);
+  font-family: 'IBM Plex Mono', monospace;
   font-size: 8px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.activity-kind.note {
+  color: #8a6800;
+}
+
+.activity-detail {
+  max-width: 74ch;
+  margin: 4px 0 0;
+  color: var(--ink);
+  font-size: 10px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.activity-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 7px;
+  margin-top: 5px;
+  color: var(--ink-faint);
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.activity-meta time::before {
+  margin-right: 7px;
+  content: '\00b7';
 }
 
 /* Applicant intake */
@@ -4081,21 +4130,9 @@ summary:focus-visible {
   background: var(--paper);
 }
 
-.case-topbar > div {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.case-topbar span {
-  color: var(--blue);
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 8px;
-  text-transform: uppercase;
-}
-
 .case-topbar strong {
-  font-size: 11px;
+  color: var(--ink);
+  font-size: 12px;
 }
 
 .drawer-error {
@@ -4697,10 +4734,6 @@ summary:focus-visible {
 
 .eligibility-note.muted {
   color: var(--ink-faint);
-}
-
-.activity-panel .activity-timeline {
-  padding: 2px 0 0;
 }
 
 /* Intake wizard */
